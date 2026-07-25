@@ -2,30 +2,30 @@
   "cold_start": {
     "end_to_end_baseline": {
       "handrolled": {
-        "max_s": 0.7965,
-        "median_s": 0.7585,
-        "min_s": 0.7405,
+        "max_s": 0.72,
+        "median_s": 0.7133,
+        "min_s": 0.708,
         "n": 7
       },
       "langgraph": {
-        "max_s": 1.2268,
-        "median_s": 1.1232,
-        "min_s": 1.0447,
+        "max_s": 0.9866,
+        "median_s": 0.9804,
+        "min_s": 0.9777,
         "n": 7
       },
       "note": "full baseline scenario: process start, MCP server spawn, 24 loop steps, exit"
     },
     "import_only": {
       "handrolled": {
-        "max_s": 0.3412,
-        "median_s": 0.3374,
-        "min_s": 0.3266,
+        "max_s": 0.3262,
+        "median_s": 0.3192,
+        "min_s": 0.3145,
         "n": 7
       },
       "langgraph": {
-        "max_s": 0.6102,
-        "median_s": 0.5975,
-        "min_s": 0.5776,
+        "max_s": 0.6136,
+        "median_s": 0.5615,
+        "min_s": 0.5585,
         "n": 7
       },
       "note": "python -c importing exactly what each implementation needs, from a warm page cache"
@@ -98,7 +98,7 @@
         "uvicorn"
       ],
       "distributions_installed": 29,
-      "fresh_install_wall_s": 4.71,
+      "fresh_install_wall_s": 4.52,
       "requested": [
         "mcp"
       ],
@@ -165,7 +165,7 @@
         "zstandard"
       ],
       "distributions_installed": 56,
-      "fresh_install_wall_s": 7.37,
+      "fresh_install_wall_s": 6.89,
       "requested": [
         "mcp",
         "langgraph",
@@ -175,64 +175,77 @@
       "site_packages_mb": 75.1
     }
   },
-  "generated_at_utc": "2026-07-25T02:50:18Z",
+  "generated_at_utc": "2026-07-25T03:07:14Z",
   "loc": {
     "handrolled_only": {
       "files": {
         "handrolled/atomic_io.py": {
-          "code": 37,
-          "physical": 45
+          "code": 38,
+          "logic": 28,
+          "physical": 46
         },
         "handrolled/loop.py": {
           "code": 157,
+          "logic": 148,
           "physical": 186
         },
         "handrolled/run.py": {
           "code": 59,
+          "logic": 55,
           "physical": 71
         }
       },
-      "total_code_lines": 253,
-      "total_physical_lines": 302
+      "total_code_lines": 254,
+      "total_logic_lines": 231,
+      "total_physical_lines": 303
     },
     "langgraph_only": {
       "files": {
         "langgraph_impl/graph.py": {
           "code": 192,
+          "logic": 179,
           "physical": 243
         },
         "langgraph_impl/run.py": {
           "code": 85,
+          "logic": 77,
           "physical": 109
         }
       },
       "total_code_lines": 277,
+      "total_logic_lines": 256,
       "total_physical_lines": 352
     },
     "shared": {
       "files": {
         "tools/fault.py": {
           "code": 28,
+          "logic": 15,
           "physical": 36
         },
         "tools/mcp_client.py": {
           "code": 81,
+          "logic": 58,
           "physical": 103
         },
         "tools/mcp_server.py": {
           "code": 89,
+          "logic": 73,
           "physical": 119
         },
         "tools/policy.py": {
           "code": 97,
+          "logic": 75,
           "physical": 120
         },
         "tools/world.py": {
           "code": 177,
+          "logic": 153,
           "physical": 241
         }
       },
       "total_code_lines": 472,
+      "total_logic_lines": 374,
       "total_physical_lines": 619
     },
     "tool_contract_json_lines": 152

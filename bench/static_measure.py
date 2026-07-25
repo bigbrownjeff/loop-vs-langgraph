@@ -1,8 +1,11 @@
 """Counted, not estimated: lines of code, dependency weight, cold start.
 
 Lines of code
-  Physical lines, minus blank lines and minus whole-line `#` comments.
-  Docstrings ARE counted, because they are lines someone has to maintain.
+  Two counts per bucket. `code` is physical lines minus blanks minus
+  whole-line `#` comments, and includes docstrings. `logic` additionally
+  strips every docstring, so that a longer explanatory docstring in one
+  implementation cannot inflate its own total. Both are reported because the
+  first count is the one that would flatter whoever wrote more prose.
   Reported in three buckets -- shared, hand-rolled only, LangGraph only --
   because the shared bucket (MCP layer, policy, fault injection) is identical
   for both and folding it into either total would be dishonest.
@@ -24,6 +27,7 @@ Usage:  python bench/static_measure.py [--skip-venvs]
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import shutil
 import statistics
@@ -50,9 +54,30 @@ N_TIMING = 7
 
 
 def count_loc(rel: str) -> dict:
-    lines = (REPO / rel).read_text().splitlines()
+    """Three counts, because the first one flatters whoever wrote more prose.
+
+    `code` excludes blanks and comment-only lines but INCLUDES docstrings.
+    `logic` also excludes every module, class and function docstring, so a
+    verbose explainer in one implementation cannot inflate its own total.
+    Both are reported. They agree on the direction here.
+    """
+    src = (REPO / rel).read_text()
+    lines = src.splitlines()
     code = [ln for ln in lines if ln.strip() and not ln.strip().startswith("#")]
-    return {"physical": len(lines), "code": len(code)}
+
+    doc_lines: set[int] = set()
+    for node in ast.walk(ast.parse(src)):
+        if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            body = node.body
+            if (body and isinstance(body[0], ast.Expr)
+                    and isinstance(body[0].value, ast.Constant)
+                    and isinstance(body[0].value.value, str)):
+                doc_lines.update(range(body[0].lineno, body[0].end_lineno + 1))
+    logic = sum(
+        1 for i, ln in enumerate(lines, 1)
+        if i not in doc_lines and ln.strip() and not ln.strip().startswith("#")
+    )
+    return {"physical": len(lines), "code": len(code), "logic": logic}
 
 
 def loc_report() -> dict:
@@ -62,6 +87,7 @@ def loc_report() -> dict:
         out[bucket] = {
             "files": per_file,
             "total_code_lines": sum(v["code"] for v in per_file.values()),
+            "total_logic_lines": sum(v["logic"] for v in per_file.values()),
             "total_physical_lines": sum(v["physical"] for v in per_file.values()),
         }
     contract = (REPO / "tools" / "tool-defs.json").read_text().splitlines()
@@ -197,8 +223,9 @@ def main() -> None:
 
     (OUT / "static.json").write_text(json.dumps(results, indent=2, sort_keys=True))
     print(json.dumps({k: v for k, v in results.items() if k != "loc"}, indent=2)[:2500])
-    print("LOC:", json.dumps(
-        {b: results["loc"][b]["total_code_lines"] for b in BUCKETS}, indent=2))
+    print("LOC (code / logic):", json.dumps(
+        {b: [results["loc"][b]["total_code_lines"], results["loc"][b]["total_logic_lines"]]
+         for b in BUCKETS}, indent=2))
     print(f"wrote {OUT / 'static.json'}")
 
 

@@ -46,17 +46,22 @@ defect in the port.
 
 ## 1. The port was easy, and it did not save any code
 
-`python bench/static_measure.py`. Code lines are physical lines minus blanks
-minus whole-line comments. Docstrings are counted, because someone maintains them.
+`python bench/static_measure.py`. Two counts per bucket. **Code** is physical
+lines minus blanks minus whole-line comments, and includes docstrings. **Logic**
+additionally strips every docstring, because the first count would flatter
+whichever implementation I happened to write more prose in, and I wrote a longer
+module docstring on the LangGraph side.
 
-| Bucket | Code lines |
-|---|---|
-| Shared (MCP server, MCP client, policy, world, fault injection) | 472 |
-| Hand-rolled only (`loop.py`, `run.py`, `atomic_io.py`) | 253 |
-| LangGraph only (`graph.py`, `run.py`) | 277 |
-| Frozen tool contract (`tool-defs.json`, non-blank) | 152 |
+| Bucket | Code lines | Logic lines |
+|---|---|---|
+| Shared (MCP server, MCP client, policy, world, fault injection) | 472 | 374 |
+| Hand-rolled only (`loop.py`, `run.py`, `atomic_io.py`) | 254 | 231 |
+| LangGraph only (`graph.py`, `run.py`) | 277 | 256 |
+| Frozen tool contract (`tool-defs.json`, non-blank) | 152 | n/a |
 
-**The LangGraph implementation is 24 lines longer than the one it replaced.**
+**The LangGraph implementation is 23 lines longer counting docstrings, and 25
+lines longer with docstrings stripped.** The two counts agree on the direction,
+which is the point of running both.
 
 That is not a knock on LangGraph so much as a statement about scale. The
 hand-rolled loop is a `while` loop over a dict of six functions plus 34 lines of
@@ -226,9 +231,30 @@ Identical error surface. The difference is what survived:
 | Where it stopped | `next_node: act` | `next_nodes: ["act"]` |
 
 LangGraph's checkpointer records where the run was, not that it died or why. The
-error message lives in the process's stderr and vanishes with the process. You
-can fix this by writing your own error handler that pushes a status into state,
-which is exactly the thing you were hoping the framework would already do.
+error message lives in the process's stderr and vanishes with the process.
+
+**This row overstates a framework difference, and the honest version is
+narrower.** The hand-rolled driver owns the state dict, so its `except` clause
+writes `status: failed` into the checkpoint on the way out. I did not write the
+equivalent in the LangGraph version, and most of the gap in that table is that
+choice, not the framework.
+
+What is genuinely a framework property: an exception that escapes a node commits
+nothing, so a node cannot record its own death, and the caller does not own the
+state object and cannot simply annotate it. What is genuinely available:
+`aupdate_state` from the caller. Tested directly, after the same injected
+exception:
+
+```
+status: failed
+exit_reason: tool error: act: injected mid-run exception in act(s2)
+next: ('act',)
+```
+
+Two lines, and the run stays resumable at the same pending node. So the correct
+claim is **"LangGraph does not record a verdict by default and you have to know
+to ask for one,"** not "LangGraph cannot record a verdict." The default is the
+finding. The gap is not.
 
 Timing note: on the timeout case both took about 4.8s wall against a 2.0s
 deadline. The extra time is MCP client and subprocess teardown, not the loop.
@@ -286,8 +312,9 @@ is nothing. On a Lambda cold start it is not nothing.
 
 ## The verdict
 
-LangGraph is not a shortcut at this size. It cost 24 more lines than the loop it
-replaced, 27 dependencies, and about a third of a second per run. It did not make
+LangGraph is not a shortcut at this size. It cost 23 more lines than the loop it
+replaced (25 with docstrings stripped), 27 dependencies, and about a third of a
+second per run. It did not make
 crash-safety easier than 34 lines of atomic file write, and on the measurement
 that matters most, kill and resume, the two implementations are exactly tied.
 

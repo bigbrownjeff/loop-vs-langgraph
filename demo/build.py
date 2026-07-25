@@ -53,7 +53,9 @@ scoreboard = "\n".join([
         f'{loc["handrolled_only"]["total_code_lines"]}',
         f'{loc["langgraph_only"]["total_code_lines"]}',
         f'Shared layer, identical for both: {loc["shared"]["total_code_lines"]} lines. '
-        f'Blanks and comment-only lines excluded.',
+        f'Blanks and comment-only lines excluded. With docstrings also stripped it is '
+        f'{loc["handrolled_only"]["total_logic_lines"]} against '
+        f'{loc["langgraph_only"]["total_logic_lines"]}, so the gap is not my prose.',
         "hr"),
     row("Python distributions installed",
         f'{dep[HR]["distributions_installed"]}',
@@ -98,9 +100,11 @@ scoreboard = "\n".join([
         "hr"),
     row("Persisted state says why the run died",
         f'yes, status <code>{fail["cases"]["crash"][HR]["state_after"]["status_in_checkpoint"]}</code> plus the message',
-        f'no, status <code>{fail["cases"]["crash"][LG]["state_after"]["status_in_digest"]}</code>',
-        "After an injected mid-run exception. LangGraph records position, not verdict.",
-        "hr"),
+        f'not by default, status <code>{fail["cases"]["crash"][LG]["state_after"]["status_in_digest"]}</code>',
+        "After an injected mid-run exception. Most of this gap is a choice I made, not the "
+        "framework: the hand-rolled driver owns the state dict and writes a verdict on the "
+        "way out. LangGraph can do the same in two lines via aupdate_state, tested. The "
+        "finding is that it does not by default."),
     row("Halts before an irreversible action",
         "yes" if eh["halted_before_s3"] else "no",
         "yes" if el["halted_before_s3"] else "no",
