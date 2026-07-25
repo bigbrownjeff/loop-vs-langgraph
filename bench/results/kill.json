@@ -1,0 +1,541 @@
+{
+  "generated_at_utc": "2026-07-25T02:49:42Z",
+  "implementations": {
+    "handrolled": {
+      "clean": {
+        "digest": {
+          "approved": [],
+          "artifacts": {
+            "s1": "s1:collect release artifacts:attempt-1",
+            "s2": "s2:diff the manifest against the last release:attempt-2",
+            "s3": "s3:scan dependency licences:attempt-1",
+            "s4": "s4:write the audit summary:attempt-1"
+          },
+          "attempts": {
+            "s1": 1,
+            "s2": 2,
+            "s3": 1,
+            "s4": 1
+          },
+          "cursor": 4,
+          "escalation": null,
+          "exit_reason": "done: all success criteria met and gated",
+          "history": [
+            "orient",
+            "plan",
+            "decide:act",
+            "act:s1#1",
+            "verify:s1:pass",
+            "record",
+            "decide:act",
+            "act:s2#1",
+            "verify:s2:fail",
+            "record",
+            "decide:act",
+            "act:s2#2",
+            "verify:s2:pass",
+            "record",
+            "decide:act",
+            "act:s3#1",
+            "verify:s3:pass",
+            "record",
+            "decide:act",
+            "act:s4#1",
+            "verify:s4:pass",
+            "record",
+            "decide:done"
+          ],
+          "records": 6,
+          "resumed_count": 0,
+          "run_id": "rel-audit-1",
+          "scenario": "baseline",
+          "spent_usd": 1.8,
+          "status": "done",
+          "verified": [
+            "s1",
+            "s2",
+            "s3",
+            "s4"
+          ]
+        },
+        "exit_code": 0,
+        "tool_calls": {
+          "act:s1#1": 1,
+          "act:s2#1": 1,
+          "act:s2#2": 1,
+          "act:s3#1": 1,
+          "act:s4#1": 1,
+          "orient": 1,
+          "plan": 1,
+          "record": 6,
+          "verify": 5
+        },
+        "wall_s": 0.8277
+      },
+      "kill_point_a": {
+        "duplicate_act_calls": {},
+        "kill_signal": "SIGKILL to the process group, 1.0s into a 3.0s act(s2)",
+        "killed_at_epoch": 1784947785.256,
+        "killed_exit_code": -9,
+        "on_disk_after_kill": {
+          "checkpoint_bytes": 1407,
+          "checkpoint_parses": true,
+          "files": [
+            "record-seq.json",
+            "run1.log",
+            "state.json",
+            "tool-calls.jsonl"
+          ],
+          "history_len": 7,
+          "next_node": "act",
+          "spent_usd": 0.2,
+          "temp_files_left": []
+        },
+        "resume_digest": {
+          "approved": [],
+          "artifacts": {
+            "s1": "s1:collect release artifacts:attempt-1",
+            "s2": "s2:diff the manifest against the last release:attempt-2",
+            "s3": "s3:scan dependency licences:attempt-1",
+            "s4": "s4:write the audit summary:attempt-1"
+          },
+          "attempts": {
+            "s1": 1,
+            "s2": 2,
+            "s3": 1,
+            "s4": 1
+          },
+          "cursor": 4,
+          "escalation": null,
+          "exit_reason": "done: all success criteria met and gated",
+          "history": [
+            "orient",
+            "plan",
+            "decide:act",
+            "act:s1#1",
+            "verify:s1:pass",
+            "record",
+            "decide:act",
+            "act:s2#1",
+            "verify:s2:fail",
+            "record",
+            "decide:act",
+            "act:s2#2",
+            "verify:s2:pass",
+            "record",
+            "decide:act",
+            "act:s3#1",
+            "verify:s3:pass",
+            "record",
+            "decide:act",
+            "act:s4#1",
+            "verify:s4:pass",
+            "record",
+            "decide:done"
+          ],
+          "records": 6,
+          "resumed_count": 1,
+          "run_id": "rel-audit-1",
+          "scenario": "baseline",
+          "spent_usd": 1.8,
+          "status": "done",
+          "verified": [
+            "s1",
+            "s2",
+            "s3",
+            "s4"
+          ]
+        },
+        "resume_exit_code": 0,
+        "resume_matches_clean": true,
+        "resume_stderr": "",
+        "tool_calls_before_kill": {
+          "act:s1#1": 1,
+          "orient": 1,
+          "plan": 1,
+          "record": 1,
+          "verify": 1
+        },
+        "tool_calls_total": {
+          "act:s1#1": 1,
+          "act:s2#1": 1,
+          "act:s2#2": 1,
+          "act:s3#1": 1,
+          "act:s4#1": 1,
+          "orient": 1,
+          "plan": 1,
+          "record": 6,
+          "verify": 5
+        }
+      },
+      "kill_point_b": {
+        "duplicate_act_calls": {
+          "act:s2#1": 2
+        },
+        "kill_signal": "os._exit(137) at the end of act's 2nd visit (step s2, attempt 1)",
+        "killed_exit_code": 137,
+        "on_disk_after_kill": {
+          "checkpoint_bytes": 1407,
+          "checkpoint_parses": true,
+          "files": [
+            "record-seq.json",
+            "state.json",
+            "tool-calls.jsonl"
+          ],
+          "history_len": 7,
+          "next_node": "act",
+          "spent_usd": 0.2,
+          "temp_files_left": []
+        },
+        "resume_digest": {
+          "approved": [],
+          "artifacts": {
+            "s1": "s1:collect release artifacts:attempt-1",
+            "s2": "s2:diff the manifest against the last release:attempt-2",
+            "s3": "s3:scan dependency licences:attempt-1",
+            "s4": "s4:write the audit summary:attempt-1"
+          },
+          "attempts": {
+            "s1": 1,
+            "s2": 2,
+            "s3": 1,
+            "s4": 1
+          },
+          "cursor": 4,
+          "escalation": null,
+          "exit_reason": "done: all success criteria met and gated",
+          "history": [
+            "orient",
+            "plan",
+            "decide:act",
+            "act:s1#1",
+            "verify:s1:pass",
+            "record",
+            "decide:act",
+            "act:s2#1",
+            "verify:s2:fail",
+            "record",
+            "decide:act",
+            "act:s2#2",
+            "verify:s2:pass",
+            "record",
+            "decide:act",
+            "act:s3#1",
+            "verify:s3:pass",
+            "record",
+            "decide:act",
+            "act:s4#1",
+            "verify:s4:pass",
+            "record",
+            "decide:done"
+          ],
+          "records": 6,
+          "resumed_count": 1,
+          "run_id": "rel-audit-1",
+          "scenario": "baseline",
+          "spent_usd": 1.8,
+          "status": "done",
+          "verified": [
+            "s1",
+            "s2",
+            "s3",
+            "s4"
+          ]
+        },
+        "resume_exit_code": 0,
+        "resume_matches_clean": true,
+        "resume_stderr": "",
+        "tool_calls_before_kill": {
+          "act:s1#1": 1,
+          "act:s2#1": 1,
+          "orient": 1,
+          "plan": 1,
+          "record": 1,
+          "verify": 1
+        },
+        "tool_calls_total": {
+          "act:s1#1": 1,
+          "act:s2#1": 2,
+          "act:s2#2": 1,
+          "act:s3#1": 1,
+          "act:s4#1": 1,
+          "orient": 1,
+          "plan": 1,
+          "record": 6,
+          "verify": 5
+        }
+      }
+    },
+    "langgraph": {
+      "clean": {
+        "digest": {
+          "approved": [],
+          "artifacts": {
+            "s1": "s1:collect release artifacts:attempt-1",
+            "s2": "s2:diff the manifest against the last release:attempt-2",
+            "s3": "s3:scan dependency licences:attempt-1",
+            "s4": "s4:write the audit summary:attempt-1"
+          },
+          "attempts": {
+            "s1": 1,
+            "s2": 2,
+            "s3": 1,
+            "s4": 1
+          },
+          "cursor": 4,
+          "escalation": null,
+          "exit_reason": "done: all success criteria met and gated",
+          "history": [
+            "orient",
+            "plan",
+            "decide:act",
+            "act:s1#1",
+            "verify:s1:pass",
+            "record",
+            "decide:act",
+            "act:s2#1",
+            "verify:s2:fail",
+            "record",
+            "decide:act",
+            "act:s2#2",
+            "verify:s2:pass",
+            "record",
+            "decide:act",
+            "act:s3#1",
+            "verify:s3:pass",
+            "record",
+            "decide:act",
+            "act:s4#1",
+            "verify:s4:pass",
+            "record",
+            "decide:done"
+          ],
+          "next_nodes": [],
+          "records": 6,
+          "resumed_count": 0,
+          "run_id": "rel-audit-1",
+          "scenario": "baseline",
+          "spent_usd": 1.8,
+          "status": "done",
+          "verified": [
+            "s1",
+            "s2",
+            "s3",
+            "s4"
+          ]
+        },
+        "exit_code": 0,
+        "tool_calls": {
+          "act:s1#1": 1,
+          "act:s2#1": 1,
+          "act:s2#2": 1,
+          "act:s3#1": 1,
+          "act:s4#1": 1,
+          "orient": 1,
+          "plan": 1,
+          "record": 6,
+          "verify": 5
+        },
+        "wall_s": 1.1679
+      },
+      "kill_point_a": {
+        "duplicate_act_calls": {},
+        "kill_signal": "SIGKILL to the process group, 1.0s into a 3.0s act(s2)",
+        "killed_at_epoch": 1784947790.834,
+        "killed_exit_code": -9,
+        "on_disk_after_kill": {
+          "checkpoint_bytes": 4096,
+          "files": [
+            "checkpoints.sqlite",
+            "checkpoints.sqlite-shm",
+            "checkpoints.sqlite-wal",
+            "record-seq.json",
+            "run1.log",
+            "tool-calls.jsonl"
+          ],
+          "sqlite_sidecars": [
+            "checkpoints.sqlite-shm",
+            "checkpoints.sqlite-wal"
+          ]
+        },
+        "resume_digest": {
+          "approved": [],
+          "artifacts": {
+            "s1": "s1:collect release artifacts:attempt-1",
+            "s2": "s2:diff the manifest against the last release:attempt-2",
+            "s3": "s3:scan dependency licences:attempt-1",
+            "s4": "s4:write the audit summary:attempt-1"
+          },
+          "attempts": {
+            "s1": 1,
+            "s2": 2,
+            "s3": 1,
+            "s4": 1
+          },
+          "cursor": 4,
+          "escalation": null,
+          "exit_reason": "done: all success criteria met and gated",
+          "history": [
+            "orient",
+            "plan",
+            "decide:act",
+            "act:s1#1",
+            "verify:s1:pass",
+            "record",
+            "decide:act",
+            "act:s2#1",
+            "verify:s2:fail",
+            "record",
+            "decide:act",
+            "act:s2#2",
+            "verify:s2:pass",
+            "record",
+            "decide:act",
+            "act:s3#1",
+            "verify:s3:pass",
+            "record",
+            "decide:act",
+            "act:s4#1",
+            "verify:s4:pass",
+            "record",
+            "decide:done"
+          ],
+          "next_nodes": [],
+          "records": 6,
+          "resumed_count": 1,
+          "run_id": "rel-audit-1",
+          "scenario": "baseline",
+          "spent_usd": 1.8,
+          "status": "done",
+          "verified": [
+            "s1",
+            "s2",
+            "s3",
+            "s4"
+          ]
+        },
+        "resume_exit_code": 0,
+        "resume_matches_clean": true,
+        "resume_stderr": "",
+        "tool_calls_before_kill": {
+          "act:s1#1": 1,
+          "orient": 1,
+          "plan": 1,
+          "record": 1,
+          "verify": 1
+        },
+        "tool_calls_total": {
+          "act:s1#1": 1,
+          "act:s2#1": 1,
+          "act:s2#2": 1,
+          "act:s3#1": 1,
+          "act:s4#1": 1,
+          "orient": 1,
+          "plan": 1,
+          "record": 6,
+          "verify": 5
+        }
+      },
+      "kill_point_b": {
+        "duplicate_act_calls": {
+          "act:s2#1": 2
+        },
+        "kill_signal": "os._exit(137) at the end of act's 2nd visit (step s2, attempt 1)",
+        "killed_exit_code": 137,
+        "on_disk_after_kill": {
+          "checkpoint_bytes": 4096,
+          "files": [
+            "checkpoints.sqlite",
+            "checkpoints.sqlite-shm",
+            "checkpoints.sqlite-wal",
+            "record-seq.json",
+            "tool-calls.jsonl"
+          ],
+          "sqlite_sidecars": [
+            "checkpoints.sqlite-shm",
+            "checkpoints.sqlite-wal"
+          ]
+        },
+        "resume_digest": {
+          "approved": [],
+          "artifacts": {
+            "s1": "s1:collect release artifacts:attempt-1",
+            "s2": "s2:diff the manifest against the last release:attempt-2",
+            "s3": "s3:scan dependency licences:attempt-1",
+            "s4": "s4:write the audit summary:attempt-1"
+          },
+          "attempts": {
+            "s1": 1,
+            "s2": 2,
+            "s3": 1,
+            "s4": 1
+          },
+          "cursor": 4,
+          "escalation": null,
+          "exit_reason": "done: all success criteria met and gated",
+          "history": [
+            "orient",
+            "plan",
+            "decide:act",
+            "act:s1#1",
+            "verify:s1:pass",
+            "record",
+            "decide:act",
+            "act:s2#1",
+            "verify:s2:fail",
+            "record",
+            "decide:act",
+            "act:s2#2",
+            "verify:s2:pass",
+            "record",
+            "decide:act",
+            "act:s3#1",
+            "verify:s3:pass",
+            "record",
+            "decide:act",
+            "act:s4#1",
+            "verify:s4:pass",
+            "record",
+            "decide:done"
+          ],
+          "next_nodes": [],
+          "records": 6,
+          "resumed_count": 1,
+          "run_id": "rel-audit-1",
+          "scenario": "baseline",
+          "spent_usd": 1.8,
+          "status": "done",
+          "verified": [
+            "s1",
+            "s2",
+            "s3",
+            "s4"
+          ]
+        },
+        "resume_exit_code": 0,
+        "resume_matches_clean": true,
+        "resume_stderr": "",
+        "tool_calls_before_kill": {
+          "act:s1#1": 1,
+          "act:s2#1": 1,
+          "orient": 1,
+          "plan": 1,
+          "record": 1,
+          "verify": 1
+        },
+        "tool_calls_total": {
+          "act:s1#1": 1,
+          "act:s2#1": 2,
+          "act:s2#2": 1,
+          "act:s3#1": 1,
+          "act:s4#1": 1,
+          "orient": 1,
+          "plan": 1,
+          "record": 6,
+          "verify": 5
+        }
+      }
+    }
+  },
+  "python": "3.14.6"
+}

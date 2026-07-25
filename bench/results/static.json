@@ -1,0 +1,242 @@
+{
+  "cold_start": {
+    "end_to_end_baseline": {
+      "handrolled": {
+        "max_s": 0.7965,
+        "median_s": 0.7585,
+        "min_s": 0.7405,
+        "n": 7
+      },
+      "langgraph": {
+        "max_s": 1.2268,
+        "median_s": 1.1232,
+        "min_s": 1.0447,
+        "n": 7
+      },
+      "note": "full baseline scenario: process start, MCP server spawn, 24 loop steps, exit"
+    },
+    "import_only": {
+      "handrolled": {
+        "max_s": 0.3412,
+        "median_s": 0.3374,
+        "min_s": 0.3266,
+        "n": 7
+      },
+      "langgraph": {
+        "max_s": 0.6102,
+        "median_s": 0.5975,
+        "min_s": 0.5776,
+        "n": 7
+      },
+      "note": "python -c importing exactly what each implementation needs, from a warm page cache"
+    }
+  },
+  "dependencies": {
+    "framework_cost": {
+      "extra_distribution_names": [
+        "PyYAML",
+        "aiosqlite",
+        "charset-normalizer",
+        "distro",
+        "jsonpatch",
+        "jsonpointer",
+        "langchain-core",
+        "langchain-protocol",
+        "langgraph",
+        "langgraph-checkpoint",
+        "langgraph-checkpoint-sqlite",
+        "langgraph-prebuilt",
+        "langgraph-sdk",
+        "langsmith",
+        "orjson",
+        "ormsgpack",
+        "packaging",
+        "requests",
+        "requests-toolbelt",
+        "sniffio",
+        "sqlite-vec",
+        "tenacity",
+        "urllib3",
+        "uuid_utils",
+        "websockets",
+        "xxhash",
+        "zstandard"
+      ],
+      "extra_distributions": 27,
+      "extra_site_packages_mb": 28.2
+    },
+    "handrolled": {
+      "distributions": [
+        "PyJWT",
+        "annotated-types",
+        "anyio",
+        "attrs",
+        "certifi",
+        "cffi",
+        "click",
+        "cryptography",
+        "h11",
+        "httpcore",
+        "httpx",
+        "httpx-sse",
+        "idna",
+        "jsonschema",
+        "jsonschema-specifications",
+        "mcp",
+        "pycparser",
+        "pydantic",
+        "pydantic-settings",
+        "pydantic_core",
+        "python-dotenv",
+        "python-multipart",
+        "referencing",
+        "rpds-py",
+        "sse-starlette",
+        "starlette",
+        "typing-inspection",
+        "typing_extensions",
+        "uvicorn"
+      ],
+      "distributions_installed": 29,
+      "fresh_install_wall_s": 4.71,
+      "requested": [
+        "mcp"
+      ],
+      "site_packages_bytes": 46918153,
+      "site_packages_mb": 46.9
+    },
+    "langgraph": {
+      "distributions": [
+        "PyJWT",
+        "PyYAML",
+        "aiosqlite",
+        "annotated-types",
+        "anyio",
+        "attrs",
+        "certifi",
+        "cffi",
+        "charset-normalizer",
+        "click",
+        "cryptography",
+        "distro",
+        "h11",
+        "httpcore",
+        "httpx",
+        "httpx-sse",
+        "idna",
+        "jsonpatch",
+        "jsonpointer",
+        "jsonschema",
+        "jsonschema-specifications",
+        "langchain-core",
+        "langchain-protocol",
+        "langgraph",
+        "langgraph-checkpoint",
+        "langgraph-checkpoint-sqlite",
+        "langgraph-prebuilt",
+        "langgraph-sdk",
+        "langsmith",
+        "mcp",
+        "orjson",
+        "ormsgpack",
+        "packaging",
+        "pycparser",
+        "pydantic",
+        "pydantic-settings",
+        "pydantic_core",
+        "python-dotenv",
+        "python-multipart",
+        "referencing",
+        "requests",
+        "requests-toolbelt",
+        "rpds-py",
+        "sniffio",
+        "sqlite-vec",
+        "sse-starlette",
+        "starlette",
+        "tenacity",
+        "typing-inspection",
+        "typing_extensions",
+        "urllib3",
+        "uuid_utils",
+        "uvicorn",
+        "websockets",
+        "xxhash",
+        "zstandard"
+      ],
+      "distributions_installed": 56,
+      "fresh_install_wall_s": 7.37,
+      "requested": [
+        "mcp",
+        "langgraph",
+        "langgraph-checkpoint-sqlite"
+      ],
+      "site_packages_bytes": 75114657,
+      "site_packages_mb": 75.1
+    }
+  },
+  "generated_at_utc": "2026-07-25T02:50:18Z",
+  "loc": {
+    "handrolled_only": {
+      "files": {
+        "handrolled/atomic_io.py": {
+          "code": 37,
+          "physical": 45
+        },
+        "handrolled/loop.py": {
+          "code": 157,
+          "physical": 186
+        },
+        "handrolled/run.py": {
+          "code": 59,
+          "physical": 71
+        }
+      },
+      "total_code_lines": 253,
+      "total_physical_lines": 302
+    },
+    "langgraph_only": {
+      "files": {
+        "langgraph_impl/graph.py": {
+          "code": 192,
+          "physical": 243
+        },
+        "langgraph_impl/run.py": {
+          "code": 85,
+          "physical": 109
+        }
+      },
+      "total_code_lines": 277,
+      "total_physical_lines": 352
+    },
+    "shared": {
+      "files": {
+        "tools/fault.py": {
+          "code": 28,
+          "physical": 36
+        },
+        "tools/mcp_client.py": {
+          "code": 81,
+          "physical": 103
+        },
+        "tools/mcp_server.py": {
+          "code": 89,
+          "physical": 119
+        },
+        "tools/policy.py": {
+          "code": 97,
+          "physical": 120
+        },
+        "tools/world.py": {
+          "code": 177,
+          "physical": 241
+        }
+      },
+      "total_code_lines": 472,
+      "total_physical_lines": 619
+    },
+    "tool_contract_json_lines": 152
+  },
+  "platform": "Darwin 25.5.0 arm64",
+  "python": "3.14.6"
+}

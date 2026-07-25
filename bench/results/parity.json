@@ -1,0 +1,417 @@
+{
+  "all_scenarios_outcome_identical": true,
+  "excluded_keys": [
+    "next_nodes",
+    "resumed_count"
+  ],
+  "generated_at_utc": "2026-07-25T02:49:35Z",
+  "known_divergence": "On the three escalating scenarios the two digests differ on `history` and `records`, and only those. Cause: LangGraph's interrupt() raises out of the decide node, so that node's state update is discarded and never committed. The escalation is recoverable only from the interrupt payload on the pending task, which langgraph_impl/run.py reads back explicitly. The hand-rolled loop commits the same update before it stops, so its own state says it escalated. Both loops halted at the same place, before the same step, having spent the same amount. See RESULTS.md finding 4.",
+  "outcome_keys": [
+    "status",
+    "exit_reason",
+    "escalation",
+    "approved",
+    "cursor",
+    "spent_usd",
+    "artifacts",
+    "attempts",
+    "verified"
+  ],
+  "python": "3.14.6",
+  "scenarios": {
+    "baseline": {
+      "differing_keys": [],
+      "handrolled_digest": {
+        "approved": [],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-2",
+          "s3": "s3:scan dependency licences:attempt-1",
+          "s4": "s4:write the audit summary:attempt-1"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 2,
+          "s3": 1,
+          "s4": 1
+        },
+        "cursor": 4,
+        "escalation": null,
+        "exit_reason": "done: all success criteria met and gated",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:fail",
+          "record",
+          "decide:act",
+          "act:s2#2",
+          "verify:s2:pass",
+          "record",
+          "decide:act",
+          "act:s3#1",
+          "verify:s3:pass",
+          "record",
+          "decide:act",
+          "act:s4#1",
+          "verify:s4:pass",
+          "record",
+          "decide:done"
+        ],
+        "records": 6,
+        "run_id": "rel-audit-1",
+        "scenario": "baseline",
+        "spent_usd": 1.8,
+        "status": "done",
+        "verified": [
+          "s1",
+          "s2",
+          "s3",
+          "s4"
+        ]
+      },
+      "identical": true,
+      "langgraph_digest": {
+        "approved": [],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-2",
+          "s3": "s3:scan dependency licences:attempt-1",
+          "s4": "s4:write the audit summary:attempt-1"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 2,
+          "s3": 1,
+          "s4": 1
+        },
+        "cursor": 4,
+        "escalation": null,
+        "exit_reason": "done: all success criteria met and gated",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:fail",
+          "record",
+          "decide:act",
+          "act:s2#2",
+          "verify:s2:pass",
+          "record",
+          "decide:act",
+          "act:s3#1",
+          "verify:s3:pass",
+          "record",
+          "decide:act",
+          "act:s4#1",
+          "verify:s4:pass",
+          "record",
+          "decide:done"
+        ],
+        "records": 6,
+        "run_id": "rel-audit-1",
+        "scenario": "baseline",
+        "spent_usd": 1.8,
+        "status": "done",
+        "verified": [
+          "s1",
+          "s2",
+          "s3",
+          "s4"
+        ]
+      },
+      "outcome_identical": true
+    },
+    "irreversible": {
+      "differing_keys": [
+        "history",
+        "records"
+      ],
+      "handrolled_digest": {
+        "approved": [],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-1"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 1
+        },
+        "cursor": 2,
+        "escalation": {
+          "step_id": "s3",
+          "tripwire": [
+            "irreversible action: publish the release to the public index"
+          ]
+        },
+        "exit_reason": "blocked: human-escalation tripwire fired",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:pass",
+          "record",
+          "decide:escalate"
+        ],
+        "records": 3,
+        "run_id": "rel-audit-1",
+        "scenario": "irreversible",
+        "spent_usd": 0.6,
+        "status": "escalated",
+        "verified": [
+          "s1",
+          "s2"
+        ]
+      },
+      "identical": false,
+      "langgraph_digest": {
+        "approved": [],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-1"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 1
+        },
+        "cursor": 2,
+        "escalation": {
+          "step_id": "s3",
+          "tripwire": [
+            "irreversible action: publish the release to the public index"
+          ]
+        },
+        "exit_reason": "blocked: human-escalation tripwire fired",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:pass",
+          "record"
+        ],
+        "records": 2,
+        "run_id": "rel-audit-1",
+        "scenario": "irreversible",
+        "spent_usd": 0.6,
+        "status": "escalated",
+        "verified": [
+          "s1",
+          "s2"
+        ]
+      },
+      "outcome_identical": true
+    },
+    "overspend": {
+      "differing_keys": [
+        "history",
+        "records"
+      ],
+      "handrolled_digest": {
+        "approved": [],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-1"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 1
+        },
+        "cursor": 2,
+        "escalation": {
+          "step_id": "s3",
+          "tripwire": [
+            "spend beyond cap: $0.60 spent + $8.00 est > $5.00 cap"
+          ]
+        },
+        "exit_reason": "blocked: human-escalation tripwire fired",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:pass",
+          "record",
+          "decide:escalate"
+        ],
+        "records": 3,
+        "run_id": "rel-audit-1",
+        "scenario": "overspend",
+        "spent_usd": 0.6,
+        "status": "escalated",
+        "verified": [
+          "s1",
+          "s2"
+        ]
+      },
+      "identical": false,
+      "langgraph_digest": {
+        "approved": [],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-1"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 1
+        },
+        "cursor": 2,
+        "escalation": {
+          "step_id": "s3",
+          "tripwire": [
+            "spend beyond cap: $0.60 spent + $8.00 est > $5.00 cap"
+          ]
+        },
+        "exit_reason": "blocked: human-escalation tripwire fired",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:pass",
+          "record"
+        ],
+        "records": 2,
+        "run_id": "rel-audit-1",
+        "scenario": "overspend",
+        "spent_usd": 0.6,
+        "status": "escalated",
+        "verified": [
+          "s1",
+          "s2"
+        ]
+      },
+      "outcome_identical": true
+    },
+    "verify_stuck": {
+      "differing_keys": [
+        "history",
+        "records"
+      ],
+      "handrolled_digest": {
+        "approved": [],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-3"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 3
+        },
+        "cursor": 1,
+        "escalation": {
+          "step_id": "s2",
+          "tripwire": [
+            "verify gate failed 3x on s2 with no new hypothesis"
+          ]
+        },
+        "exit_reason": "blocked: verification failed the maximum number of times",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:fail",
+          "record",
+          "decide:act",
+          "act:s2#2",
+          "verify:s2:fail",
+          "record",
+          "decide:act",
+          "act:s2#3",
+          "verify:s2:fail",
+          "record",
+          "decide:escalate"
+        ],
+        "records": 5,
+        "run_id": "rel-audit-1",
+        "scenario": "verify_stuck",
+        "spent_usd": 1.4,
+        "status": "escalated",
+        "verified": [
+          "s1"
+        ]
+      },
+      "identical": false,
+      "langgraph_digest": {
+        "approved": [],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-3"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 3
+        },
+        "cursor": 1,
+        "escalation": {
+          "step_id": "s2",
+          "tripwire": [
+            "verify gate failed 3x on s2 with no new hypothesis"
+          ]
+        },
+        "exit_reason": "blocked: verification failed the maximum number of times",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:fail",
+          "record",
+          "decide:act",
+          "act:s2#2",
+          "verify:s2:fail",
+          "record",
+          "decide:act",
+          "act:s2#3",
+          "verify:s2:fail",
+          "record"
+        ],
+        "records": 4,
+        "run_id": "rel-audit-1",
+        "scenario": "verify_stuck",
+        "spent_usd": 1.4,
+        "status": "escalated",
+        "verified": [
+          "s1"
+        ]
+      },
+      "outcome_identical": true
+    }
+  }
+}

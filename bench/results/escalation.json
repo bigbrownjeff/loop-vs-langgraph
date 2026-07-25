@@ -1,0 +1,266 @@
+{
+  "generated_at_utc": "2026-07-25T02:50:07Z",
+  "implementations": {
+    "handrolled": {
+      "after_approval_digest": {
+        "approved": [
+          "s3"
+        ],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-1",
+          "s3": "s3:publish the release to the public index:attempt-1",
+          "s4": "s4:write the audit summary:attempt-1"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 1,
+          "s3": 1,
+          "s4": 1
+        },
+        "cursor": 4,
+        "escalation": null,
+        "exit_reason": "done: all success criteria met and gated",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:pass",
+          "record",
+          "decide:escalate",
+          "human:approved-by-jeff",
+          "decide:act",
+          "act:s3#1",
+          "verify:s3:pass",
+          "record",
+          "decide:act",
+          "act:s4#1",
+          "verify:s4:pass",
+          "record",
+          "decide:done"
+        ],
+        "records": 6,
+        "resumed_count": 1,
+        "run_id": "rel-audit-1",
+        "scenario": "irreversible",
+        "spent_usd": 1.4,
+        "status": "done",
+        "verified": [
+          "s1",
+          "s2",
+          "s3",
+          "s4"
+        ]
+      },
+      "approve_exit_code": 0,
+      "approve_stderr": "",
+      "calls_at_halt": {
+        "act:s1": 1,
+        "act:s2": 1,
+        "orient": 1,
+        "plan": 1,
+        "record:act": 2,
+        "record:escalate": 1,
+        "verify": 2
+      },
+      "calls_total": {
+        "act:s1": 1,
+        "act:s2": 1,
+        "act:s3": 1,
+        "act:s4": 1,
+        "orient": 1,
+        "plan": 1,
+        "record:act": 4,
+        "record:escalate": 1,
+        "record:exit": 1,
+        "verify": 4
+      },
+      "completed_after_approval": true,
+      "escalate_record_duplicated_on_resume": false,
+      "escalate_records_written": 1,
+      "halt_exit_code": 0,
+      "halted_before_s3": true,
+      "halted_digest": {
+        "approved": [],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-1"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 1
+        },
+        "cursor": 2,
+        "escalation": {
+          "step_id": "s3",
+          "tripwire": [
+            "irreversible action: publish the release to the public index"
+          ]
+        },
+        "exit_reason": "blocked: human-escalation tripwire fired",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:pass",
+          "record",
+          "decide:escalate"
+        ],
+        "records": 3,
+        "resumed_count": 0,
+        "run_id": "rel-audit-1",
+        "scenario": "irreversible",
+        "spent_usd": 0.6,
+        "status": "escalated",
+        "verified": [
+          "s1",
+          "s2"
+        ]
+      },
+      "s3_ran_after_approval": true
+    },
+    "langgraph": {
+      "after_approval_digest": {
+        "approved": [
+          "s3"
+        ],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-1",
+          "s3": "s3:publish the release to the public index:attempt-1",
+          "s4": "s4:write the audit summary:attempt-1"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 1,
+          "s3": 1,
+          "s4": 1
+        },
+        "cursor": 4,
+        "escalation": null,
+        "exit_reason": "done: all success criteria met and gated",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:pass",
+          "record",
+          "decide:escalate",
+          "human:approved-by-jeff",
+          "decide:act",
+          "act:s3#1",
+          "verify:s3:pass",
+          "record",
+          "decide:act",
+          "act:s4#1",
+          "verify:s4:pass",
+          "record",
+          "decide:done"
+        ],
+        "next_nodes": [],
+        "records": 7,
+        "resumed_count": 1,
+        "run_id": "rel-audit-1",
+        "scenario": "irreversible",
+        "spent_usd": 1.4,
+        "status": "done",
+        "verified": [
+          "s1",
+          "s2",
+          "s3",
+          "s4"
+        ]
+      },
+      "approve_exit_code": 0,
+      "approve_stderr": "",
+      "calls_at_halt": {
+        "act:s1": 1,
+        "act:s2": 1,
+        "orient": 1,
+        "plan": 1,
+        "record:act": 2,
+        "record:escalate": 1,
+        "verify": 2
+      },
+      "calls_total": {
+        "act:s1": 1,
+        "act:s2": 1,
+        "act:s3": 1,
+        "act:s4": 1,
+        "orient": 1,
+        "plan": 1,
+        "record:act": 4,
+        "record:escalate": 2,
+        "record:exit": 1,
+        "verify": 4
+      },
+      "completed_after_approval": true,
+      "escalate_record_duplicated_on_resume": true,
+      "escalate_records_written": 2,
+      "halt_exit_code": 0,
+      "halted_before_s3": true,
+      "halted_digest": {
+        "approved": [],
+        "artifacts": {
+          "s1": "s1:collect release artifacts:attempt-1",
+          "s2": "s2:diff the manifest against the last release:attempt-1"
+        },
+        "attempts": {
+          "s1": 1,
+          "s2": 1
+        },
+        "cursor": 2,
+        "escalation": {
+          "step_id": "s3",
+          "tripwire": [
+            "irreversible action: publish the release to the public index"
+          ]
+        },
+        "exit_reason": "blocked: human-escalation tripwire fired",
+        "history": [
+          "orient",
+          "plan",
+          "decide:act",
+          "act:s1#1",
+          "verify:s1:pass",
+          "record",
+          "decide:act",
+          "act:s2#1",
+          "verify:s2:pass",
+          "record"
+        ],
+        "next_nodes": [
+          "decide"
+        ],
+        "records": 2,
+        "resumed_count": 0,
+        "run_id": "rel-audit-1",
+        "scenario": "irreversible",
+        "spent_usd": 0.6,
+        "status": "escalated",
+        "verified": [
+          "s1",
+          "s2"
+        ]
+      },
+      "s3_ran_after_approval": true
+    }
+  },
+  "python": "3.14.6",
+  "scenario": "irreversible (s3 publishes to a public index)"
+}

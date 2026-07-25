@@ -1,0 +1,133 @@
+{
+  "cases": {
+    "crash": {
+      "handrolled": {
+        "exit_code": 3,
+        "harness_had_to_kill_it": false,
+        "loop_saw_exception_class": "ToolError",
+        "state_after": {
+          "exit_reason_in_checkpoint": "tool error in act: act: injected mid-run exception in act(s2)",
+          "files": [
+            "digest.json",
+            "record-seq.json",
+            "state.json",
+            "tool-calls.jsonl"
+          ],
+          "next_node": "act",
+          "status_in_checkpoint": "failed"
+        },
+        "stderr_first_line": "FAILED ToolError: act: injected mid-run exception in act(s2)",
+        "stderr_tail": "FAILED ToolError: act: injected mid-run exception in act(s2)",
+        "wall_s": 0.746
+      },
+      "langgraph": {
+        "exit_code": 3,
+        "harness_had_to_kill_it": false,
+        "loop_saw_exception_class": "ToolError",
+        "state_after": {
+          "files": [
+            "checkpoints.sqlite",
+            "digest.json",
+            "record-seq.json",
+            "tool-calls.jsonl"
+          ],
+          "history_len": 7,
+          "next_nodes": [
+            "act"
+          ],
+          "status_in_digest": "running"
+        },
+        "stderr_first_line": "FAILED ToolError: act: injected mid-run exception in act(s2)",
+        "stderr_tail": "FAILED ToolError: act: injected mid-run exception in act(s2)",
+        "wall_s": 1.026
+      }
+    },
+    "schema_violation": {
+      "handrolled": {
+        "exit_code": 3,
+        "harness_had_to_kill_it": false,
+        "loop_saw_exception_class": "ToolError",
+        "state_after": {
+          "exit_reason_in_checkpoint": "tool error in act: act: Output validation error: '0.40' is not of type 'number'",
+          "files": [
+            "digest.json",
+            "record-seq.json",
+            "state.json",
+            "tool-calls.jsonl"
+          ],
+          "next_node": "act",
+          "status_in_checkpoint": "failed"
+        },
+        "stderr_first_line": "FAILED ToolError: act: Output validation error: '0.40' is not of type 'number'",
+        "stderr_tail": "FAILED ToolError: act: Output validation error: '0.40' is not of type 'number'",
+        "wall_s": 0.802
+      },
+      "langgraph": {
+        "exit_code": 3,
+        "harness_had_to_kill_it": false,
+        "loop_saw_exception_class": "ToolError",
+        "state_after": {
+          "files": [
+            "checkpoints.sqlite",
+            "digest.json",
+            "record-seq.json",
+            "tool-calls.jsonl"
+          ],
+          "history_len": 7,
+          "next_nodes": [
+            "act"
+          ],
+          "status_in_digest": "running"
+        },
+        "stderr_first_line": "FAILED ToolError: act: Output validation error: '0.40' is not of type 'number'",
+        "stderr_tail": "FAILED ToolError: act: Output validation error: '0.40' is not of type 'number'",
+        "wall_s": 1.166
+      }
+    },
+    "timeout": {
+      "handrolled": {
+        "exit_code": 3,
+        "harness_had_to_kill_it": false,
+        "loop_saw_exception_class": "ToolTimeout",
+        "state_after": {
+          "exit_reason_in_checkpoint": "tool timeout in act: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
+          "files": [
+            "digest.json",
+            "record-seq.json",
+            "state.json",
+            "tool-calls.jsonl"
+          ],
+          "next_node": "act",
+          "status_in_checkpoint": "failed"
+        },
+        "stderr_first_line": "Process group termination failed for PID 87804: [Errno 1] Operation not permitted, falling back to simple terminate",
+        "stderr_tail": "Process group termination failed for PID 87804: [Errno 1] Operation not permitted, falling back to simple terminate\nFAILED ToolTimeout: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
+        "wall_s": 4.81
+      },
+      "langgraph": {
+        "exit_code": 3,
+        "harness_had_to_kill_it": false,
+        "loop_saw_exception_class": "ToolTimeout",
+        "state_after": {
+          "files": [
+            "checkpoints.sqlite",
+            "digest.json",
+            "record-seq.json",
+            "tool-calls.jsonl"
+          ],
+          "history_len": 7,
+          "next_nodes": [
+            "act"
+          ],
+          "status_in_digest": "running"
+        },
+        "stderr_first_line": "Process group termination failed for PID 87850: [Errno 1] Operation not permitted, falling back to simple terminate",
+        "stderr_tail": "Process group termination failed for PID 87850: [Errno 1] Operation not permitted, falling back to simple terminate\nFAILED ToolTimeout: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
+        "wall_s": 4.965
+      }
+    }
+  },
+  "generated_at_utc": "2026-07-25T02:49:54Z",
+  "harness_limit_s": 60,
+  "python": "3.14.6"
+}

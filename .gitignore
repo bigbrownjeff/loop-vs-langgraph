@@ -1,0 +1,8 @@
+.venv/
+bench/.venvtmp/
+bench/results/*
+!bench/results/*.json
+runs/
+__pycache__/
+*.pyc
+.DS_Store

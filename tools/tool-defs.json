@@ -1,0 +1,152 @@
+{
+  "contract_version": "1.0.0",
+  "description": "Frozen tool contract for the operating loop. Loaded verbatim by the MCP server: `parameters` is published as inputSchema, `returns` as outputSchema. Neither loop implementation may hand-copy a schema; there is no second copy to drift.",
+  "tools": [
+    {
+      "name": "orient",
+      "description": "Load the objective, its success criteria, its constraints (budget cap) and its blast radius. Step 1 of the operating loop.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "objective_id": {"type": "string", "minLength": 1},
+          "scenario": {
+            "type": "string",
+            "enum": ["baseline", "irreversible", "overspend", "verify_stuck"]
+          }
+        },
+        "required": ["objective_id", "scenario"],
+        "additionalProperties": false
+      },
+      "returns": {
+        "type": "object",
+        "properties": {
+          "objective": {"type": "string"},
+          "success_criteria": {"type": "array", "items": {"type": "string"}},
+          "budget_cap_usd": {"type": "number", "minimum": 0},
+          "blast_radius": {"type": "string", "enum": ["local", "project", "cross-project"]}
+        },
+        "required": ["objective", "success_criteria", "budget_cap_usd", "blast_radius"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "plan",
+      "description": "Decompose the objective into an ordered checklist of verifiable steps. Each step declares whether it is reversible and what it is estimated to cost. Step 2 of the operating loop.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "objective_id": {"type": "string", "minLength": 1},
+          "scenario": {
+            "type": "string",
+            "enum": ["baseline", "irreversible", "overspend", "verify_stuck"]
+          }
+        },
+        "required": ["objective_id", "scenario"],
+        "additionalProperties": false
+      },
+      "returns": {
+        "type": "object",
+        "properties": {
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string"},
+                "title": {"type": "string"},
+                "reversible": {"type": "boolean"},
+                "est_cost_usd": {"type": "number", "minimum": 0}
+              },
+              "required": ["id", "title", "reversible", "est_cost_usd"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["steps"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "act",
+      "description": "Execute exactly one planned step and return its artifact and realised cost. Deterministic: the same (scenario, step_id, attempt) always produces the same artifact.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "objective_id": {"type": "string", "minLength": 1},
+          "scenario": {
+            "type": "string",
+            "enum": ["baseline", "irreversible", "overspend", "verify_stuck"]
+          },
+          "step_id": {"type": "string", "minLength": 1},
+          "attempt": {"type": "integer", "minimum": 1}
+        },
+        "required": ["objective_id", "scenario", "step_id", "attempt"],
+        "additionalProperties": false
+      },
+      "returns": {
+        "type": "object",
+        "properties": {
+          "step_id": {"type": "string"},
+          "artifact": {"type": "string"},
+          "cost_usd": {"type": "number", "minimum": 0}
+        },
+        "required": ["step_id", "artifact", "cost_usd"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "verify",
+      "description": "The hard verify gate. Score one artifact against the objective's success criteria. The loop may not advance on a failed gate. Step 4 of the operating loop.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "objective_id": {"type": "string", "minLength": 1},
+          "scenario": {
+            "type": "string",
+            "enum": ["baseline", "irreversible", "overspend", "verify_stuck"]
+          },
+          "step_id": {"type": "string", "minLength": 1},
+          "artifact": {"type": "string"},
+          "attempt": {"type": "integer", "minimum": 1}
+        },
+        "required": ["objective_id", "scenario", "step_id", "artifact", "attempt"],
+        "additionalProperties": false
+      },
+      "returns": {
+        "type": "object",
+        "properties": {
+          "passed": {"type": "boolean"},
+          "reasons": {"type": "array", "items": {"type": "string"}}
+        },
+        "required": ["passed", "reasons"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "record",
+      "description": "Append one entry to the durable run record. Step 5 of the operating loop. Write-only and append-only; the server owns the sequence number.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "run_id": {"type": "string", "minLength": 1},
+          "kind": {
+            "type": "string",
+            "enum": ["orient", "plan", "act", "verify", "decide", "escalate", "exit"]
+          },
+          "detail": {"type": "string"}
+        },
+        "required": ["run_id", "kind", "detail"],
+        "additionalProperties": false
+      },
+      "returns": {
+        "type": "object",
+        "properties": {
+          "seq": {"type": "integer", "minimum": 1},
+          "run_id": {"type": "string"}
+        },
+        "required": ["seq", "run_id"],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
