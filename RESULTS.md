@@ -291,30 +291,36 @@ own.
 |---|---|---|---|
 | Distributions installed | 29 | 56 | **+27** |
 | `site-packages` on disk | 46.9 MB | 75.1 MB | **+28.2 MB** |
-| Fresh install wall time | 4.76s | 6.86s | +2.10s |
+| Fresh install wall time | 4.52s | 6.89s | +2.37s |
 
 Cold start, best of 7, warm page cache:
 
 | | Hand-rolled | LangGraph | Difference |
 |---|---|---|---|
-| Import only, median | 0.337s | 0.598s | **+0.261s** |
-| Import only, min | 0.327s | 0.578s | +0.251s |
-| Full baseline run, median | 0.759s | 1.123s | **+0.364s** |
-| Full baseline run, min | 0.741s | 1.045s | +0.304s |
+| Import only, median | 0.319s | 0.562s | **+0.242s** |
+| Import only, min | 0.315s | 0.559s | +0.244s |
+| Full baseline run, median | 0.713s | 0.980s | **+0.267s** |
+| Full baseline run, min | 0.708s | 0.978s | +0.270s |
+
+These four timings are the one part of this file that moves between runs. They
+are transcribed from the committed `bench/results/static.json`; re-running
+`bench/static_measure.py` will shift them by a few tens of milliseconds without
+changing the gap. Everything else in this file is a count or a yes/no and is
+stable across runs.
 
 The 27 extra distributions include `langsmith`, `requests`, `urllib3`,
 `websockets`, `sqlite-vec`, `zstandard`, `xxhash`, `orjson` and `ormsgpack`.
 Most of that is the LangChain observability and transport surface, which this
-artifact never uses. On a CLI that runs every few minutes, a third of a second
-is nothing. On a Lambda cold start it is not nothing.
+artifact never uses. On a CLI that runs every few minutes, a quarter of a
+second is nothing. On a Lambda cold start it is not nothing.
 
 ---
 
 ## The verdict
 
 LangGraph is not a shortcut at this size. It cost 23 more lines than the loop it
-replaced (25 with docstrings stripped), 27 dependencies, and about a third of a
-second per run. It did not make
+replaced (25 with docstrings stripped), 27 dependencies, and about a quarter of
+a second per run. It did not make
 crash-safety easier than 34 lines of atomic file write, and on the measurement
 that matters most, kill and resume, the two implementations are exactly tied.
 
