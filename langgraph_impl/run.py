@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -60,11 +61,28 @@ async def main_async(args: argparse.Namespace) -> int:
                     payload = None
                 else:
                     payload = initial_state(args.run_id, args.scenario)
-                await app.ainvoke(payload, config=config)
+                # durability="sync": persist each checkpoint before the next
+                # super-step starts. The default is "async", which overlaps
+                # the write with the next step and reopens exactly the crash
+                # window kill point B aims at. Sync is the production setting;
+                # the kill tests run against this code path.
+                await app.ainvoke(payload, config=config, durability="sync")
         except BaseException as exc:  # noqa: BLE001 - unwrapped and re-classified below
             leaf = first_leaf(exc)
             print(f"FAILED {type(leaf).__name__}: {leaf}", file=sys.stderr, flush=True)
             exit_code = 3 if isinstance(leaf, (ToolError, ToolTimeout)) else 4
+            # The framework persists position, not verdict: an exception that
+            # escapes a node commits nothing, so after a crash the checkpoint
+            # says `running` with a pending node and the reason dies with the
+            # process (RESULTS.md finding 7). These lines are the caller-side
+            # fix: write the verdict into the thread, which stays resumable at
+            # the same pending node. The bare default stays measurable behind
+            # LOOPLAB_SKIP_VERDICT_WRITE (bench/failure_modes.py runs both).
+            if not os.environ.get("LOOPLAB_SKIP_VERDICT_WRITE"):
+                kind = "tool timeout" if isinstance(leaf, ToolTimeout) else "tool error"
+                await app.aupdate_state(
+                    config, {"status": "failed", "exit_reason": f"{kind}: {leaf}"}
+                )
 
         # Read final state back out of the checkpointer, not out of the return
         # value, so a crashed run and a clean run are read the same way.

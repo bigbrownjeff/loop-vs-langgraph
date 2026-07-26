@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-26T14:49:29Z",
+  "generated_at_utc": "2026-07-25T02:50:11Z",
   "implementations": {
     "handrolled": {
       "canonical_checkpoint_file": "state.json",
@@ -8,7 +8,7 @@
         "record-seq.json": 18,
         "run1.log": 267,
         "state.json": 1407,
-        "tool-calls.jsonl": 757
+        "tool-calls.jsonl": 754
       },
       "note_on_sizes": "The two checkpoint stores are not like for like. state.json holds ONLY the current head state. The SQLite store holds every checkpoint in the thread's history, which is what makes LangGraph's time-travel and fork features possible. Compare the file sizes with that in mind.",
       "resume_from_all_files": {
@@ -43,7 +43,7 @@
         "checkpoints.sqlite-wal": 251352,
         "record-seq.json": 18,
         "run1.log": 267,
-        "tool-calls.jsonl": 759
+        "tool-calls.jsonl": 754
       },
       "note_on_sizes": "The two checkpoint stores are not like for like. state.json holds ONLY the current head state. The SQLite store holds every checkpoint in the thread's history, which is what makes LangGraph's time-travel and fork features possible. Compare the file sizes with that in mind.",
       "resume_from_all_files": {
@@ -64,13 +64,13 @@
           "checkpoints.sqlite",
           "record-seq.json"
         ],
-        "exit_code": 1,
-        "resumed_history_len": null,
-        "resumed_spent_usd": null,
-        "resumed_status": null,
-        "stderr_tail": "s-langgraph/langgraph_impl/run.py\", line 102, in main_async\n    digest = policy.state_digest(state)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/user/loop-vs-langgraph/tools/policy.py\", line 107, in state_digest\n    \"run_id\": state[\"run_id\"],\n              ~~~~~^^^^^^^^^^\nKeyError: 'run_id'"
+        "exit_code": 4,
+        "resumed_history_len": 0,
+        "resumed_spent_usd": 0.0,
+        "resumed_status": "running",
+        "stderr_tail": "FAILED EmptyInputError: Received no input for __start__"
       }
     }
   },
-  "python": "3.11.15"
+  "python": "3.14.6"
 }

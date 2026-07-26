@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-26T14:48:37Z",
+  "generated_at_utc": "2026-07-25T02:49:42Z",
   "implementations": {
     "handrolled": {
       "clean": {
@@ -70,12 +70,12 @@
           "record": 6,
           "verify": 5
         },
-        "wall_s": 1.2554
+        "wall_s": 0.8277
       },
       "kill_point_a": {
         "duplicate_act_calls": {},
         "kill_signal": "SIGKILL to the process group, 1.0s into a 3.0s act(s2)",
-        "killed_at_epoch": 1785077320.605,
+        "killed_at_epoch": 1784947785.256,
         "killed_exit_code": -9,
         "on_disk_after_kill": {
           "checkpoint_bytes": 1407,
@@ -336,12 +336,12 @@
           "record": 6,
           "verify": 5
         },
-        "wall_s": 1.7968
+        "wall_s": 1.1679
       },
       "kill_point_a": {
         "duplicate_act_calls": {},
         "kill_signal": "SIGKILL to the process group, 1.0s into a 3.0s act(s2)",
-        "killed_at_epoch": 1785077328.335,
+        "killed_at_epoch": 1784947790.834,
         "killed_exit_code": -9,
         "on_disk_after_kill": {
           "checkpoint_bytes": 4096,
@@ -537,5 +537,5 @@
       }
     }
   },
-  "python": "3.11.15"
+  "python": "3.14.6"
 }

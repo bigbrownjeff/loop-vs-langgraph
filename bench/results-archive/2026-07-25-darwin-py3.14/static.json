@@ -2,30 +2,30 @@
   "cold_start": {
     "end_to_end_baseline": {
       "handrolled": {
-        "max_s": 1.4508,
-        "median_s": 1.3595,
-        "min_s": 1.2487,
+        "max_s": 0.72,
+        "median_s": 0.7133,
+        "min_s": 0.708,
         "n": 7
       },
       "langgraph": {
-        "max_s": 1.8602,
-        "median_s": 1.8082,
-        "min_s": 1.731,
+        "max_s": 0.9866,
+        "median_s": 0.9804,
+        "min_s": 0.9777,
         "n": 7
       },
       "note": "full baseline scenario: process start, MCP server spawn, 24 loop steps, exit"
     },
     "import_only": {
       "handrolled": {
-        "max_s": 0.532,
-        "median_s": 0.5099,
-        "min_s": 0.4919,
+        "max_s": 0.3262,
+        "median_s": 0.3192,
+        "min_s": 0.3145,
         "n": 7
       },
       "langgraph": {
-        "max_s": 1.0958,
-        "median_s": 1.0319,
-        "min_s": 0.9908,
+        "max_s": 0.6136,
+        "median_s": 0.5615,
+        "min_s": 0.5585,
         "n": 7
       },
       "note": "python -c importing exactly what each implementation needs, from a warm page cache"
@@ -63,7 +63,7 @@
         "zstandard"
       ],
       "extra_distributions": 27,
-      "extra_site_packages_mb": 51.5
+      "extra_site_packages_mb": 28.2
     },
     "handrolled": {
       "distributions": [
@@ -98,12 +98,12 @@
         "uvicorn"
       ],
       "distributions_installed": 29,
-      "fresh_install_wall_s": 9.37,
+      "fresh_install_wall_s": 4.52,
       "requested": [
         "mcp"
       ],
-      "site_packages_bytes": 61959911,
-      "site_packages_mb": 62.0
+      "site_packages_bytes": 46918153,
+      "site_packages_mb": 46.9
     },
     "langgraph": {
       "distributions": [
@@ -165,17 +165,17 @@
         "zstandard"
       ],
       "distributions_installed": 56,
-      "fresh_install_wall_s": 15.31,
+      "fresh_install_wall_s": 6.89,
       "requested": [
         "mcp",
         "langgraph",
         "langgraph-checkpoint-sqlite"
       ],
-      "site_packages_bytes": 113428066,
-      "site_packages_mb": 113.4
+      "site_packages_bytes": 75114657,
+      "site_packages_mb": 75.1
     }
   },
-  "generated_at_utc": "2026-07-26T14:49:39Z",
+  "generated_at_utc": "2026-07-25T03:07:14Z",
   "loc": {
     "handrolled_only": {
       "files": {
@@ -202,19 +202,19 @@
     "langgraph_only": {
       "files": {
         "langgraph_impl/graph.py": {
-          "code": 195,
-          "logic": 182,
-          "physical": 250
+          "code": 192,
+          "logic": 179,
+          "physical": 243
         },
         "langgraph_impl/run.py": {
-          "code": 91,
-          "logic": 83,
-          "physical": 127
+          "code": 85,
+          "logic": 77,
+          "physical": 109
         }
       },
-      "total_code_lines": 286,
-      "total_logic_lines": 265,
-      "total_physical_lines": 377
+      "total_code_lines": 277,
+      "total_logic_lines": 256,
+      "total_physical_lines": 352
     },
     "shared": {
       "files": {
@@ -250,6 +250,6 @@
     },
     "tool_contract_json_lines": 152
   },
-  "platform": "Linux 6.18.5 x86_64",
-  "python": "3.11.15"
+  "platform": "Darwin 25.5.0 arm64",
+  "python": "3.14.6"
 }

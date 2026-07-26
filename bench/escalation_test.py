@@ -34,6 +34,16 @@ IMPLS = {
     "langgraph": [PY, str(REPO / "langgraph_impl" / "run.py")],
 }
 
+# The LangGraph decide node is measured under both statement orderings.
+# Default: interrupt() first, record after resume -- the hardened ordering.
+# record_first: the side effect above the interrupt(), which the node
+# re-executes on resume. See RESULTS.md finding 5.
+CASES = {
+    "handrolled": ("handrolled", {}),
+    "langgraph": ("langgraph", {}),
+    "langgraph_record_first": ("langgraph", {"LOOPLAB_ESCALATION_ORDER": "record_first"}),
+}
+
 
 def _digest(out: str) -> dict | None:
     for line in out.splitlines():
@@ -60,12 +70,14 @@ def _calls(run_dir: Path) -> Counter:
     return c
 
 
-def run_case(impl: str) -> dict:
-    run_dir = OUT / f"esc-{impl}"
+def run_case(case: str) -> dict:
+    impl, extra_env = CASES[case]
+    run_dir = OUT / f"esc-{case}"
     shutil.rmtree(run_dir, ignore_errors=True)
     run_dir.mkdir(parents=True)
     env = dict(os.environ)
     env["LOOPLAB_STATE_DIR"] = str(run_dir)
+    env.update(extra_env)
     base = IMPLS[impl] + ["--scenario", "irreversible", "--run-dir", str(run_dir)]
 
     p1 = subprocess.run(base, env=env, capture_output=True, text=True, cwd=REPO)
@@ -103,7 +115,7 @@ def main() -> None:
         "scenario": "irreversible (s3 publishes to a public index)",
         "implementations": {},
     }
-    for impl in IMPLS:
+    for impl in CASES:
         r = run_case(impl)
         results["implementations"][impl] = r
         print(f"[{impl}] halted_before_s3={r['halted_before_s3']} "

@@ -1,6 +1,11 @@
 # loop-vs-langgraph
 
-**The same agent operating loop, built twice: once by hand, once on LangGraph, both driving one shared MCP tool layer. The verdict, up front: it is close to a wash, and the ways it is not a wash are not the ways you would guess.** The LangGraph version came out 23 lines longer (25 with docstrings stripped), pulled in 27 extra dependencies, and added about a quarter of a second to every run. On crash-safe checkpoint and resume, the measurement people actually care about, the two are exactly tied: both recover byte-identical state under a `kill -9`, and both re-execute the in-flight step exactly once. What LangGraph genuinely buys is a human-in-the-loop primitive that survives process death, a checkpoint store that keeps the whole thread rather than the head, and a runaway guard the hand-rolled loop does not have. What it costs is three sharp edges that stay invisible until something goes wrong. The most useful finding in the whole exercise belongs to neither framework: the durable run record, the one artifact this was all about protecting, was the one piece of state that neither checkpointer protected, because it lived in the tool layer.
+**The same agent operating loop, built twice: once by hand, once on LangGraph, both driving one shared MCP tool layer. The scoreboard says close to a wash. The decision, after measuring everything twice, is to adopt LangGraph — and the reasoning is the interesting part.** The LangGraph version is 32 lines longer (34 with docstrings stripped), pulls in 27 extra dependencies, and adds about half a second to every run in a container. On crash-safe checkpoint and resume, the measurement people actually care about, the two are exactly tied: both recover byte-identical state under a `kill -9`, and both re-execute the in-flight step exactly once. But the gaps are not symmetric. Every sharp edge on the LangGraph side closed with configuration or a few lines in the caller — each fix committed here and *measured*, with the original footgun reproducible behind a flag. Every gap on the hand-rolled side is an unbuilt subsystem: no runaway guard, no human-in-the-loop that survives process death, no thread history. The full decision record is **[DECISION.md](DECISION.md)**. The most useful finding still belongs to neither framework: the durable run record, the one artifact this was all about protecting, was the one piece of state that neither checkpointer protected, because it lived in the tool layer.
+
+Every count and yes/no finding reproduced identically across two environments
+(macOS arm64 / Python 3.14 and a Linux x86_64 container / Python 3.11); only
+wall-clock timings moved. The first environment's raw JSON is archived in
+`bench/results-archive/`.
 
 Full measurements, with the command that produced each one: **[RESULTS.md](RESULTS.md)**.
 Live comparison: **https://loop-lab.pages.dev** (custom domain `loop-lab.jeffpinto.com` pending a DNS record)
@@ -64,9 +69,11 @@ handrolled/                no framework
   atomic_io.py             temp -> fsync -> os.replace, plus the directory fsync
   run.py                   CLI
 
-langgraph_impl/            LangGraph 1.2.9
-  graph.py                 the same six nodes as a StateGraph, interrupt() for escalation
-  run.py                   CLI, AsyncSqliteSaver checkpointer
+langgraph_impl/            LangGraph 1.2.9, hardened (see DECISION.md)
+  graph.py                 the same six nodes as a StateGraph, interrupt() for escalation;
+                           interrupt-first ordering, footgun behind LOOPLAB_ESCALATION_ORDER
+  run.py                   CLI, AsyncSqliteSaver checkpointer, durability="sync",
+                           caller-side verdict write, bare default behind LOOPLAB_SKIP_VERDICT_WRITE
 
 bench/                     every number in RESULTS.md
   parity.py                do both implementations actually do the same thing
