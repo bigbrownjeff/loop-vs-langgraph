@@ -112,7 +112,7 @@
     <p class="sub">Once by hand. Once on LangGraph. Both driving one shared, schema-validated
     MCP tool layer that neither implementation is allowed to bypass. Then killed, timed,
     counted and crashed on purpose.</p>
-    <div class="meta">Measured on Darwin 25.5.0 arm64, Python 3.14.6, mcp 1.28.1, langgraph 1.2.9, langgraph-checkpoint-sqlite 3.1.0 &middot;
+    <div class="meta">Measured on Linux 6.18.5 x86_64, Python 3.11.15, mcp 1.28.1, langgraph 1.2.9, langgraph-checkpoint-sqlite 3.1.0. Every count and yes/no reproduced identically on macOS arm64, Python 3.14.6 (archived in bench/results-archive/) &middot;
       <a href="https://github.com/bigbrownjeff/loop-vs-langgraph">source and raw results</a></div>
   </div>
 </header>
@@ -122,17 +122,20 @@
 <section id="verdict">
   <h2><span class="num">00</span>The verdict, before the evidence</h2>
   <div class="verdict">
-    <p>It is close to a wash, and the ways it is not a wash are not the ways you would guess.</p>
-    <p>The LangGraph version came out <b>23 lines longer</b>
-    than the loop it replaced, pulled in <b>27 extra dependencies</b>,
-    and added <b>0.267s</b> to every run.
+    <p>The scoreboard says close to a wash. The decision, after measuring everything twice,
+    is to <b>adopt LangGraph</b> — and the reasoning is the part worth reading.</p>
+    <p>The LangGraph version is <b>32 lines longer</b>
+    than the loop it replaced, pulls in <b>27 extra dependencies</b>,
+    and adds <b>0.449s</b> to every run here.
     On crash-safe checkpoint and resume, the thing people actually adopt it for,
     <b>the two are exactly tied</b>: both recover byte-identical state under a real
     <code>kill -9</code>, and both re-execute the in-flight step exactly once.</p>
-    <p>What LangGraph genuinely buys is a human-in-the-loop primitive that survives process
-    death, a checkpoint store that keeps the whole thread rather than just the head, and a
-    runaway guard the hand-rolled loop does not have. What it costs is three sharp edges that
-    stay invisible until something goes wrong.</p>
+    <p>What decided it is that the gaps are not symmetric. Every sharp edge on the LangGraph
+    side closed with configuration or a few lines in the caller — each fix committed and
+    <b>measured</b>, with the original footgun still reproducible behind a flag. Every gap on
+    the hand-rolled side is an unbuilt subsystem: no runaway guard, no human-in-the-loop that
+    survives process death, no thread history. Configuration debt against construction debt
+    is not a tie.</p>
     <p>The most useful finding belongs to neither. The durable run record, the one artifact
     this whole exercise was about protecting, was the one piece of state that <b>neither
     checkpointer protected</b>, because it lived in the tool layer. Durability is a property
@@ -168,7 +171,7 @@ decide ---+--> act --> verify --> record
     </div>
     <div class="machine b">
       <h3>On LangGraph</h3>
-      <p class="tag">langgraph 1.2.9 &middot; 277 lines</p>
+      <p class="tag">langgraph 1.2.9 &middot; 286 lines</p>
 <div class="flow">START
   |
 orient --> plan --> decide --+--> act --> verify --> record
@@ -214,18 +217,18 @@ orient --> plan --> decide --+--> act --> verify --> record
   <table>
     <caption>bench/run_all.sh &middot; raw JSON in bench/results/</caption>
     <thead><tr><th>Measurement</th><th>By hand</th><th>LangGraph</th></tr></thead>
-    <tbody><tr><th scope="row">Code lines for the loop itself<div class="note">Shared layer, identical for both: 472 lines. Blanks and comment-only lines excluded. With docstrings also stripped it is 231 against 256, so the gap is not my prose.</div></th><td class="win">254</td><td>277</td></tr>
+    <tbody><tr><th scope="row">Code lines for the loop itself<div class="note">Shared layer, identical for both: 472 lines. Blanks and comment-only lines excluded. With docstrings also stripped it is 231 against 265, so the gap is not my prose.</div></th><td class="win">254</td><td>286</td></tr>
 <tr><th scope="row">Python distributions installed<div class="note">Two throwaway virtualenvs, built from scratch. The framework costs 27 extra.</div></th><td class="win">29</td><td>56</td></tr>
-<tr><th scope="row">site-packages on disk<div class="note">+28.2 MB.</div></th><td class="win">46.9 MB</td><td>75.1 MB</td></tr>
-<tr><th scope="row">Import time, median of 7<div class="note">Importing exactly what each implementation needs.</div></th><td class="win">0.3192s</td><td>0.5615s</td></tr>
-<tr><th scope="row">Full baseline run, median of 7<div class="note">Process start, MCP server spawn, 24 loop steps, exit.</div></th><td class="win">0.7133s</td><td>0.9804s</td></tr>
+<tr><th scope="row">site-packages on disk<div class="note">+51.5 MB.</div></th><td class="win">62.0 MB</td><td>113.4 MB</td></tr>
+<tr><th scope="row">Import time, median of 7<div class="note">Importing exactly what each implementation needs.</div></th><td class="win">0.5099s</td><td>1.0319s</td></tr>
+<tr><th scope="row">Full baseline run, median of 7<div class="note">Process start, MCP server spawn, 24 loop steps, exit.</div></th><td class="win">1.3595s</td><td>1.8082s</td></tr>
 <tr><th scope="row">Recovers identical state after SIGKILL<div class="note">Killed 1.0s into a 3.0s tool call, then resumed.</div></th><td>yes</td><td>yes</td></tr>
 <tr><th scope="row">Recovers identical state after a crash mid-commit<div class="note">Process death after the tool returned, before anything was persisted.</div></th><td>yes</td><td>yes</td></tr>
 <tr><th scope="row">Side-effecting steps replayed on resume<div class="note">At-least-once at the node boundary, in both. Neither gives you exactly-once.</div></th><td>1 step, once</td><td>1 step, once</td></tr>
 <tr><th scope="row">Canonical checkpoint file is self-sufficient<div class="note">Copy the file alone and resume from it. state.json is 1,407 bytes; checkpoints.sqlite is 4,096 bytes with 251,352 bytes sitting in a -wal sidecar.</div></th><td class="win">yes</td><td>no</td></tr>
-<tr><th scope="row">Persisted state says why the run died<div class="note">After an injected mid-run exception. Most of this gap is a choice I made, not the framework: the hand-rolled driver owns the state dict and writes a verdict on the way out. LangGraph can do the same in two lines via aupdate_state, tested. The finding is that it does not by default.</div></th><td>yes, status <code>failed</code> plus the message</td><td>not by default, status <code>running</code></td></tr>
+<tr><th scope="row">Persisted state says why the run died<div class="note">After an injected mid-run exception. The framework default persists position, not verdict; the committed runner writes the verdict from the caller in two lines of aupdate_state and stays resumable. Both variants are measured.</div></th><td>yes, status <code>failed</code> plus the message</td><td>yes as committed, status <code>failed</code>; bare default says <code>running</code> with no reason</td></tr>
 <tr><th scope="row">Halts before an irreversible action<div class="note">And a separate process can answer the halt in both.</div></th><td>yes</td><td>yes</td></tr>
-<tr><th scope="row">Escalation written to the run record<div class="note">Resuming an interrupt re-runs the whole node, including side effects above it.</div></th><td class="win">1 time</td><td>2 times</td></tr>
+<tr><th scope="row">Escalation written to the run record<div class="note">Resuming an interrupt re-runs the whole node, including side effects above it. Both statement orderings are measured; the committed code interrupts first.</div></th><td>1 time</td><td>1 time as committed; 2 times with the side effect above interrupt()</td></tr>
 <tr><th scope="row">Runaway protection<div class="note">The baseline run needs 24 super-steps. Measured: it fails at 23.</div></th><td>none</td><td class="win">recursion_limit, default 25</td></tr>
 <tr><th scope="row">Human-in-the-loop primitive<div class="note">interrupt() plus Command(resume=...), and it survives process death.</div></th><td>14 lines, written for this test</td><td class="win">built in</td></tr></tbody>
   </table>
@@ -250,7 +253,10 @@ orient --> plan --> decide --+--> act --> verify --> record
       <p>Process death at the end of the <code>act</code> node, after the tool returned and
       before either implementation persisted anything. <b>Both resumed to byte-identical final
       state, and both re-ran that one step exactly once.</b> At-least-once at the node boundary
-      is the semantics in both cases. Neither gives you exactly-once without idempotent tools.</p>
+      is the semantics in both cases. Neither gives you exactly-once without idempotent tools.
+      The LangGraph runner invokes with <code>durability="sync"</code>, so a checkpoint lands
+      before the next super-step; the default overlaps the write with the next step, which is
+      exactly this window.</p>
     </div>
     <div class="edge">
       <h3>Then: copy the checkpoint file and try to resume from it alone</h3>
@@ -260,7 +266,13 @@ orient --> plan --> decide --+--> act --> verify --> record
       <b>4,096 bytes</b>, because SQLite was in WAL mode
       and the entire run was sitting in a <b>251,352 byte</b>
       <code>-wal</code> sidecar. Copying the file the name points at loses the run completely:
-      <code>FAILED EmptyInputError: Received no input for __start__</code></p>
+      <code>s-langgraph/langgraph_impl/run.py", line 102, in main_async
+    digest = policy.state_digest(state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/loop-vs-langgraph/tools/policy.py", line 107, in state_digest
+    "run_id": state["run_id"],
+              ~~~~~^^^^^^^^^^
+KeyError: 'run_id'</code></p>
       <p class="fix">Not LangGraph's bug. Standard SQLite, inherited from the checkpointer.
       Worth knowing anyway, because the filename tells you something untrue.</p>
     </div>
@@ -268,9 +280,10 @@ orient --> plan --> decide --+--> act --> verify --> record
 </section>
 
 <section id="edges">
-  <h2><span class="num">05</span>Three sharp edges</h2>
+  <h2><span class="num">05</span>Three sharp edges, all closed in the committed code</h2>
   <p class="lede">All three are defensible design consequences. All three will surprise
-  someone in production.</p>
+  someone in production. All three fixes are committed here and measured, with the original
+  behaviour reproducible behind a flag.</p>
   <div class="edges">
     <div class="edge">
       <h3>interrupt() discards the interrupting node's state update</h3>
@@ -278,15 +291,19 @@ orient --> plan --> decide --+--> act --> verify --> record
       lives only on the pending task's interrupt payload, and the caller has to know to go and
       read it back. The hand-rolled loop commits <code>status: escalated</code> and the
       tripwire text before it stops, so its own state says why it stopped.</p>
+      <p class="fix">The runner reads the pending interrupt back out of the snapshot and
+      re-attaches it to the digest. The reason survives; you just have to know where it lives.</p>
     </div>
     <div class="edge">
       <h3>Resuming an interrupt re-runs the whole node, side effects and all</h3>
-      <p>The escalation was written to the durable run record
-      <b>2 times</b> by LangGraph and
-      <b>1 time</b> by the hand-rolled loop. The code reads
-      correctly, the run completes correctly, the final state is correct, and the only evidence
-      of the double write is in the tool layer's own append-only log.</p>
-      <p class="fix">Verified fix: move interrupt() above the side effect. Re-measured: back to 1.</p>
+      <p>With the record call above <code>interrupt()</code>, the escalation lands in the
+      durable run record <b>2 times</b> against the
+      hand-rolled loop's <b>1</b>. The code reads correctly,
+      the run completes correctly, the final state is correct, and the only evidence of the
+      double write is in the tool layer's own append-only log.</p>
+      <p class="fix">Committed fix, measured: interrupt() first, record after approval — back to
+      1. Footgun reproducible with LOOPLAB_ESCALATION_ORDER=record_first.
+      Anything above an interrupt() must be idempotent; the official docs now say so too.</p>
     </div>
     <div class="edge">
       <h3>The default recursion limit is one super-step from the baseline run</h3>
@@ -295,6 +312,7 @@ orient --> plan --> decide --+--> act --> verify --> record
       raises <code>GraphRecursionError</code> at 23. One more verify retry is four more
       super-steps. The flip side, stated plainly: the hand-rolled loop has no runaway
       protection at all, and would have spun forever.</p>
+      <p class="fix">Committed fix: recursion_limit=200, set explicitly at invoke.</p>
     </div>
   </div>
 </section>
@@ -306,10 +324,10 @@ orient --> plan --> decide --+--> act --> verify --> record
   <div class="scroller">
   <table id="failtable">
     <caption>bench/failure_modes.py</caption>
-    <thead><tr><th>Fault</th><th>What both loops saw</th><th>By hand: persisted status</th><th>LangGraph: persisted status</th></tr></thead>
-    <tbody><tr><td><b>Tool returns the wrong type</b><div class="note"><code>act</code> returns <code>cost_usd</code> as the string <code>"0.40"</code></div></td><td><code>ToolError</code></td><td><code>failed</code></td><td><code>running</code></td></tr>
-<tr><td><b>Tool never answers</b><div class="note"><code>act</code> sleeps 600s against a 2s client deadline</div></td><td><code>ToolTimeout</code></td><td><code>failed</code></td><td><code>running</code></td></tr>
-<tr><td><b>Tool raises</b><div class="note"><code>act</code> throws inside the handler</div></td><td><code>ToolError</code></td><td><code>failed</code></td><td><code>running</code></td></tr></tbody>
+    <thead><tr><th>Fault</th><th>What both loops saw</th><th>By hand: persisted status</th><th>LangGraph: committed / bare default</th></tr></thead>
+    <tbody><tr><td><b>Tool returns the wrong type</b><div class="note"><code>act</code> returns <code>cost_usd</code> as the string <code>"0.40"</code></div></td><td><code>ToolError</code></td><td><code>failed</code></td><td><code>failed</code> / <code>running</code></td></tr>
+<tr><td><b>Tool never answers</b><div class="note"><code>act</code> sleeps 600s against a 2s client deadline</div></td><td><code>ToolTimeout</code></td><td><code>failed</code></td><td><code>failed</code> / <code>running</code></td></tr>
+<tr><td><b>Tool raises</b><div class="note"><code>act</code> throws inside the handler</div></td><td><code>ToolError</code></td><td><code>failed</code></td><td><code>failed</code> / <code>running</code></td></tr></tbody>
   </table>
   </div>
   <p style="margin-top:18px">The schema violation never reached either loop as bad data. The
@@ -341,6 +359,7 @@ orient --> plan --> decide --+--> act --> verify --> record
   <div class="cta">
     <a class="solid" href="https://github.com/bigbrownjeff/loop-vs-langgraph">Read the code</a>
     <a href="https://github.com/bigbrownjeff/loop-vs-langgraph/blob/main/RESULTS.md">Full results</a>
+    <a href="https://github.com/bigbrownjeff/loop-vs-langgraph/blob/main/DECISION.md">The decision record</a>
     <a href="https://github.com/bigbrownjeff/loop-vs-langgraph/tree/main/bench">Reproduction scripts</a>
   </div>
 </section>
