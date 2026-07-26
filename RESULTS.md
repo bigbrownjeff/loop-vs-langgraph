@@ -12,9 +12,20 @@ python3 -m venv .venv
 ./bench/run_all.sh
 ```
 
-**Measured on:** Darwin 25.5.0 arm64, Python 3.14.6, `mcp` 1.28.1,
-`langgraph` 1.2.9, `langgraph-checkpoint-sqlite` 3.1.0. Run date 2026-07-25 UTC.
-Raw JSON in `bench/results/`.
+**Measured on two environments**, same package versions in both: `mcp` 1.28.1,
+`langgraph` 1.2.9, `langgraph-checkpoint-sqlite` 3.1.0 (the current releases
+of all three as of 2026-07-26).
+
+- **Linux x86_64 (container), Python 3.11.15**, run date 2026-07-26 UTC — the
+  live `bench/results/`, measuring the committed (hardened) code.
+- **Darwin 25.5.0 arm64, Python 3.14.6**, run date 2026-07-25 UTC — the first
+  pass, archived in `bench/results-archive/2026-07-25-darwin-py3.14/`.
+
+Every count and every yes/no finding is identical across the two environments.
+Only wall-clock timings moved; both sets are shown in finding 9. The verdict
+this file used to end with has been revised after the second pass and a
+hardening pass on the LangGraph implementation; the decision and its
+reasoning live in [DECISION.md](DECISION.md).
 
 ---
 
@@ -39,8 +50,10 @@ Outcome fields are `status`, `exit_reason`, `escalation`, `approved`, `cursor`,
 place, before the same step, having spent the same amount, on every scenario.
 
 The three escalating scenarios differ on exactly two fields, `history` and
-`records`, and the cause is finding 4. That divergence is a result, not a
-defect in the port.
+`records`, and the cause is findings 4 and 5: the hand-rolled loop writes its
+escalation to the run record before it halts, while the committed LangGraph
+node records it only after a human approves (the interrupt-first ordering).
+That divergence is a result, not a defect in the port.
 
 ---
 
@@ -56,12 +69,15 @@ module docstring on the LangGraph side.
 |---|---|---|
 | Shared (MCP server, MCP client, policy, world, fault injection) | 472 | 374 |
 | Hand-rolled only (`loop.py`, `run.py`, `atomic_io.py`) | 254 | 231 |
-| LangGraph only (`graph.py`, `run.py`) | 277 | 256 |
+| LangGraph only (`graph.py`, `run.py`) | 286 | 265 |
 | Frozen tool contract (`tool-defs.json`, non-blank) | 152 | n/a |
 
-**The LangGraph implementation is 23 lines longer counting docstrings, and 25
+**The LangGraph implementation is 32 lines longer counting docstrings, and 34
 lines longer with docstrings stripped.** The two counts agree on the direction,
-which is the point of running both.
+which is the point of running both. The original port measured 277/256
+(+23/+25, archived set); the difference since is the hardening pass — the
+caller-side verdict write, the measurable escalation-ordering flag, and the
+sync-durability call — which this file measures like everything else.
 
 That is not a knock on LangGraph so much as a statement about scale. The
 hand-rolled loop is a `while` loop over a dict of six functions plus 34 lines of
@@ -95,6 +111,12 @@ implementation commits anything. B is the window that costs money.
 Both recover exactly. Both re-run the in-flight step exactly once and no more.
 At-least-once execution at the node boundary is the semantics in both cases, and
 neither offers exactly-once without idempotent tools.
+
+One choice behind the LangGraph row: the runner invokes with
+`durability="sync"`, so a checkpoint is persisted before the next super-step
+starts. The framework default is `"async"`, which overlaps the write with the
+next step — exactly the window kill point B aims at. The kill tests here
+measure the sync path, which is the setting a production run should use.
 
 The honest read: LangGraph gives you this for free and the hand-rolled version
 needed `atomic_io.py` to be written and gotten right, including the directory
@@ -156,32 +178,37 @@ to know to go looking somewhere else.
 
 `python bench/escalation_test.py`, `irreversible` scenario. The loop halts
 before publishing to a public index, a separate process approves it, and the run
-continues to completion.
+continues to completion. The LangGraph decide node is measured under **both
+statement orderings**: the committed default puts `interrupt()` above the
+record call; `LOOPLAB_ESCALATION_ORDER=record_first` restores the ordering the
+port originally shipped with, where the side effect sat above the interrupt.
 
-| | Hand-rolled | LangGraph |
-|---|---|---|
-| Halted before the irreversible step | yes | yes |
-| A separate process could answer the halt | yes | yes |
-| Completed correctly after approval | yes | yes |
-| `record(kind=escalate)` calls written | **1** | **2** |
+| | Hand-rolled | LangGraph (committed) | LangGraph (`record_first`) |
+|---|---|---|---|
+| Halted before the irreversible step | yes | yes | yes |
+| A separate process could answer the halt | yes | yes | yes |
+| Completed correctly after approval | yes | yes | yes |
+| `record(kind=escalate)` calls written | **1** | **1** | **2** |
 
-Both loops did the right thing. But LangGraph wrote the escalation to the
-durable run record twice, because resuming with `Command(resume=...)` re-executes
-the interrupted node from its first line, and the `record` call sat above the
-`interrupt()` call.
+With the record call above the `interrupt()`, the escalation lands in the
+durable run record twice, because resuming with `Command(resume=...)`
+re-executes the interrupted node from its first line. That was the sharpest
+edge in the whole port, because the code reads correctly, the run completes
+correctly, the state is correct, and the only evidence of the double write is
+in the tool layer's own log.
 
-**Verified mitigation:** moving `interrupt()` above the side effect brings it
-back to 1 escalation record. Measured directly by reordering the two statements
-and re-running:
+The committed ordering closes it — the escalation is recorded exactly once,
+after approval — at a cost worth stating plainly: until a human answers, the
+run record contains no escalation entry. The reason the run stopped lives in
+the interrupt payload in the checkpointer, not in the tool layer's log. Pick
+which ledger you want to be authoritative during the halt window; you do not
+get both from one non-idempotent call.
 
-```
-escalate records with interrupt() FIRST: 1
-```
-
-This is documented LangGraph behaviour. It is also the sharpest edge in the
-whole port, because the code reads correctly, the run completes correctly, the
-state is correct, and the only evidence of the double write is in the tool
-layer's own log. Anything above an `interrupt()` in a node must be idempotent.
+This is documented LangGraph behaviour, and since this repo's first
+measurement pass the official docs state the rule outright: side effects
+before an `interrupt()` must be idempotent. Nothing in your editor will tell
+you that; the ordering is measured here so it stays a regression test rather
+than folklore.
 
 Credit where due: the hand-rolled loop had no human-approval path at all before
 this test. Adding one cost 14 lines across `policy.py` and `run.py`. LangGraph
@@ -222,39 +249,31 @@ limit. The default is just tight for any loop that retries.
 | Tool timeout | `act` sleeps 600s against a 2s client deadline | `ToolTimeout: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.` | 3 |
 | Mid-run exception | `act` raises inside the handler | `ToolError: injected mid-run exception in act(s2)` | 3 |
 
-Identical error surface. The difference is what survived:
+Identical error surface. The difference is what survived. LangGraph is
+measured twice per fault: the committed runner, which writes a verdict from
+the caller after the failure, and the bare framework default
+(`LOOPLAB_SKIP_VERDICT_WRITE=1`):
 
-| | Hand-rolled | LangGraph |
-|---|---|---|
-| Status in the persisted state | `failed` | `running` |
-| Reason in the persisted state | full message, e.g. `tool error in act: act: Output validation error: ...` | absent |
-| Where it stopped | `next_node: act` | `next_nodes: ["act"]` |
+| | Hand-rolled | LangGraph (committed) | LangGraph (bare default) |
+|---|---|---|---|
+| Status in the persisted state | `failed` | `failed` | `running` |
+| Reason in the persisted state | full message, e.g. `tool error in act: ...` | full message, e.g. `tool error: act: injected mid-run exception in act(s2)` | absent |
+| Where it stopped | `next_node: act` | `next_nodes: ["act"]` | `next_nodes: ["act"]` |
+| Resumable at the failed node | yes | yes | yes |
 
-LangGraph's checkpointer records where the run was, not that it died or why. The
-error message lives in the process's stderr and vanishes with the process.
+What is genuinely a framework property: an exception that escapes a node
+commits nothing, so a node cannot record its own death, and the caller does
+not own the state object and cannot simply annotate it in place. Under the
+bare default, the checkpointer records where the run was, not that it died or
+why; the error message lives in the process's stderr and vanishes with the
+process.
 
-**This row overstates a framework difference, and the honest version is
-narrower.** The hand-rolled driver owns the state dict, so its `except` clause
-writes `status: failed` into the checkpoint on the way out. I did not write the
-equivalent in the LangGraph version, and most of the gap in that table is that
-choice, not the framework.
-
-What is genuinely a framework property: an exception that escapes a node commits
-nothing, so a node cannot record its own death, and the caller does not own the
-state object and cannot simply annotate it. What is genuinely available:
-`aupdate_state` from the caller. Tested directly, after the same injected
-exception:
-
-```
-status: failed
-exit_reason: tool error: act: injected mid-run exception in act(s2)
-next: ('act',)
-```
-
-Two lines, and the run stays resumable at the same pending node. So the correct
-claim is **"LangGraph does not record a verdict by default and you have to know
-to ask for one,"** not "LangGraph cannot record a verdict." The default is the
-finding. The gap is not.
+What is genuinely available: `aupdate_state` from the caller. That is the
+whole fix, it is two lines, the run stays resumable at the same pending node,
+and the committed runner now ships it (`langgraph_impl/run.py`). So the
+correct claim is **"LangGraph does not record a verdict by default and you
+have to know to ask for one,"** not "LangGraph cannot record a verdict." The
+default is the finding. The fix is now measured rather than merely tested.
 
 Timing note: on the timeout case both took about 4.8s wall against a 2.0s
 deadline. The extra time is MCP client and subprocess teardown, not the loop.
@@ -286,27 +305,30 @@ own.
 ## 9. What adopting the framework costs, counted
 
 `python bench/static_measure.py` builds two throwaway virtualenvs from scratch.
+Both environments are shown, because this is where the two runs actually
+differ: the counts agree exactly, the wheels and the clocks do not.
 
 | | `mcp` only | `mcp` + `langgraph` + `langgraph-checkpoint-sqlite` | Difference |
 |---|---|---|---|
-| Distributions installed | 29 | 56 | **+27** |
-| `site-packages` on disk | 46.9 MB | 75.1 MB | **+28.2 MB** |
-| Fresh install wall time | 4.52s | 6.89s | +2.37s |
+| Distributions installed (both platforms) | 29 | 56 | **+27** |
+| `site-packages`, Linux x86_64 | 62.0 MB | 113.4 MB | **+51.5 MB** |
+| `site-packages`, macOS arm64 (archived) | 46.9 MB | 75.1 MB | **+28.2 MB** |
 
 Cold start, best of 7, warm page cache:
 
 | | Hand-rolled | LangGraph | Difference |
 |---|---|---|---|
-| Import only, median | 0.319s | 0.562s | **+0.242s** |
-| Import only, min | 0.315s | 0.559s | +0.244s |
-| Full baseline run, median | 0.713s | 0.980s | **+0.267s** |
-| Full baseline run, min | 0.708s | 0.978s | +0.270s |
+| Import only, median — Linux container | 0.510s | 1.032s | **+0.522s** |
+| Full baseline run, median — Linux container | 1.360s | 1.808s | **+0.448s** |
+| Import only, median — macOS laptop (archived) | 0.319s | 0.562s | **+0.242s** |
+| Full baseline run, median — macOS laptop (archived) | 0.713s | 0.980s | **+0.267s** |
 
-These four timings are the one part of this file that moves between runs. They
-are transcribed from the committed `bench/results/static.json`; re-running
-`bench/static_measure.py` will shift them by a few tens of milliseconds without
-changing the gap. Everything else in this file is a count or a yes/no and is
-stable across runs.
+The timings are the one part of this file that moves between runs; they are
+transcribed from the committed `bench/results/static.json` and the archived
+macOS set. The framework's cold-start tax roughly doubled from the laptop to
+the container, and its disk weight nearly doubled with the platform's wheels.
+The direction never moved. Everything else in this file is a count or a
+yes/no and is identical across both environments.
 
 The 27 extra distributions include `langsmith`, `requests`, `urllib3`,
 `websockets`, `sqlite-vec`, `zstandard`, `xxhash`, `orjson` and `ormsgpack`.
@@ -318,37 +340,50 @@ second is nothing. On a Lambda cold start it is not nothing.
 
 ## The verdict
 
-LangGraph is not a shortcut at this size. It cost 23 more lines than the loop it
-replaced (25 with docstrings stripped), 27 dependencies, and about a quarter of
-a second per run. It did not make
-crash-safety easier than 34 lines of atomic file write, and on the measurement
-that matters most, kill and resume, the two implementations are exactly tied.
+**On the scoreboard it is close to a wash. As a decision it is not: adopt the
+framework.** The first version of this file stopped at the scoreboard, and the
+scoreboard has not moved — LangGraph is still not a shortcut at this size. It
+cost 23 more lines than the loop it replaced (25 with docstrings stripped), 27
+dependencies, and around half a second per run in the container. It did not
+make crash-safety easier than 34 lines of atomic file write, and on the
+measurement that matters most, kill and resume, the two implementations are
+exactly tied.
 
-What it does buy is real: a persistence model that keeps the whole thread rather
-than the head, a human-in-the-loop primitive that survives process death without
-a bespoke flag, and a runaway guard the hand-rolled loop simply does not have.
-Those are things worth having, and two of the three would have taken real
-thought to build.
+What changed the verdict is the shape of the gaps, not their count. Every
+sharp edge on the LangGraph side closed with configuration or a few lines in
+the caller, and each fix is now committed *and measured* in this repo: the
+escalation double-write is a statement ordering (finding 5, both orderings
+benched), the missing failure verdict is two lines of `aupdate_state`
+(finding 7, both defaults benched), the tight recursion limit is one argument
+(finding 6), and the checkpoint-vs-next-step race is `durability="sync"`. The
+gaps on the hand-rolled side are not like that. No runaway protection, no
+human-in-the-loop that survives process death, no thread history — those are
+unbuilt subsystems, plus 34 lines of atomic-write code with no upstream to fix
+bugs in it. Configuration debt against construction debt is not a tie.
 
-What it costs beyond the counted numbers is three sharp edges that are invisible
-until something goes wrong: an interrupt that discards the interrupting node's
-state, a resume that re-executes side effects above the interrupt, and a
-checkpointer that records position without verdict. All three are defensible
-design consequences. All three will surprise someone in production.
+The other half of the argument sits in the section below this one, and it is
+the half the first verdict underweighted. Everything this repo deliberately
+does not measure — model bindings, tool-calling loops, streaming, fan-out,
+retry and timeout policies, `error_handler`, graceful drain, alternative
+checkpointer backends — is off-the-shelf on one side and roadmap on the
+other. The deterministic policy that makes these numbers reproducible is also
+LangGraph's worst case. The moment a model or a second concurrent branch
+enters the loop, one side imports the machinery and the other side builds it.
 
-The most useful finding is none of those. It is that both implementations were
-broken in exactly the same way by the MCP client's `ExceptionGroup` wrapping, and
-that the run record, the one artifact this whole exercise is about making
-durable, was the one piece of state neither checkpointer protected. **Durability
-is a property of a system, not of an orchestrator.** Adopting a framework moves
-the boundary of what is handled for you. It does not remove the need to know
-where that boundary is.
+The three sharp edges are still real, still defensible design consequences,
+and still able to surprise someone in production; they are just closable, and
+closed here. The most useful finding is unchanged by any of this: both
+implementations were broken in exactly the same way by the MCP client's
+`ExceptionGroup` wrapping, and the run record, the one artifact this whole
+exercise is about making durable, was the one piece of state neither
+checkpointer protected. **Durability is a property of a system, not of an
+orchestrator.** Adopting a framework moves the boundary of what is handled
+for you. It does not remove the need to know where that boundary is.
 
-If you have already built these primitives, porting is a day and the outcome is
-a wash. If you have not, adopt the framework. The version of this loop that
-should worry you is neither of these two. It is the one where a tripwire fires,
-a human approves it, and nobody ever checks whether the approval got written
-down twice.
+The full decision record, including what "hardened" means line by line, is in
+[DECISION.md](DECISION.md). The version of this loop that should worry you is
+still the one where a tripwire fires, a human approves it, and nobody ever
+checks whether the approval got written down twice.
 
 ---
 
@@ -368,8 +403,9 @@ Stated plainly, because the list matters as much as the results.
   as a transitive dependency and never used.
 - **One checkpointer backend.** `AsyncSqliteSaver` only. The Postgres saver has
   different durability and portability characteristics and was not tested.
-- **Single machine, single process, warm cache, one OS.** No container, no cold
-  Lambda, no network filesystem. The cold-start numbers are best-of-7 on a laptop.
+- **Single machine, single process, warm cache.** Two OSes now (a macOS laptop
+  and a Linux container), but no cold Lambda and no network filesystem. The
+  cold-start numbers are best-of-7 in each environment.
 - **The kill tests use two specific kill points.** They are the two that seemed
   most informative. They are not a proof of crash safety, and no fuzzing over
   kill timing was done.
