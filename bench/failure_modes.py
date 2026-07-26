@@ -33,6 +33,16 @@ IMPLS = {
     "langgraph": [PY, str(REPO / "langgraph_impl" / "run.py")],
 }
 
+# LangGraph is measured twice per fault. Default: the runner writes a verdict
+# into the thread via aupdate_state after the failure. no_verdict: the bare
+# framework behaviour, where the checkpoint records position but not why the
+# run died. See RESULTS.md finding 7.
+CASES = {
+    "handrolled": ("handrolled", {}),
+    "langgraph": ("langgraph", {}),
+    "langgraph_no_verdict": ("langgraph", {"LOOPLAB_SKIP_VERDICT_WRITE": "1"}),
+}
+
 FAULTS = {
     "schema_violation": {"LOOPLAB_FAULT": "schema_violation", "LOOPLAB_FAULT_STEP": "s2"},
     "timeout": {"LOOPLAB_FAULT": "hang", "LOOPLAB_FAULT_STEP": "s2", "LOOPLAB_TOOL_TIMEOUT_S": "2"},
@@ -58,18 +68,21 @@ def _state_after(impl: str, run_dir: Path) -> dict:
         if digest.exists():
             d = json.loads(digest.read_text())
             info["status_in_digest"] = d.get("status")
+            info["exit_reason_in_digest"] = d.get("exit_reason")
             info["next_nodes"] = d.get("next_nodes")
             info["history_len"] = len(d.get("history", []))
     return info
 
 
-def run_one(impl: str, fault: str) -> dict:
-    run_dir = OUT / f"fail-{impl}-{fault}"
+def run_one(case: str, fault: str) -> dict:
+    impl, extra_env = CASES[case]
+    run_dir = OUT / f"fail-{case}-{fault}"
     shutil.rmtree(run_dir, ignore_errors=True)
     run_dir.mkdir(parents=True)
     env = dict(os.environ)
     env["LOOPLAB_STATE_DIR"] = str(run_dir)
     env.update(FAULTS[fault])
+    env.update(extra_env)
 
     cmd = IMPLS[impl] + ["--scenario", "baseline", "--run-dir", str(run_dir)]
     t0 = time.perf_counter()
@@ -110,7 +123,7 @@ def main() -> None:
     }
     for fault in FAULTS:
         results["cases"][fault] = {}
-        for impl in IMPLS:
+        for impl in CASES:
             r = run_one(impl, fault)
             results["cases"][fault][impl] = r
             print(f"[{fault}/{impl}] exit={r['exit_code']} {r['wall_s']}s "

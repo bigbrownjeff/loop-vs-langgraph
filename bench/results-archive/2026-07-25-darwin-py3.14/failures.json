@@ -18,36 +18,13 @@
         },
         "stderr_first_line": "FAILED ToolError: act: injected mid-run exception in act(s2)",
         "stderr_tail": "FAILED ToolError: act: injected mid-run exception in act(s2)",
-        "wall_s": 1.172
+        "wall_s": 0.746
       },
       "langgraph": {
         "exit_code": 3,
         "harness_had_to_kill_it": false,
         "loop_saw_exception_class": "ToolError",
         "state_after": {
-          "exit_reason_in_digest": "tool error: act: injected mid-run exception in act(s2)",
-          "files": [
-            "checkpoints.sqlite",
-            "digest.json",
-            "record-seq.json",
-            "tool-calls.jsonl"
-          ],
-          "history_len": 7,
-          "next_nodes": [
-            "act"
-          ],
-          "status_in_digest": "failed"
-        },
-        "stderr_first_line": "FAILED ToolError: act: injected mid-run exception in act(s2)",
-        "stderr_tail": "FAILED ToolError: act: injected mid-run exception in act(s2)",
-        "wall_s": 1.646
-      },
-      "langgraph_no_verdict": {
-        "exit_code": 3,
-        "harness_had_to_kill_it": false,
-        "loop_saw_exception_class": "ToolError",
-        "state_after": {
-          "exit_reason_in_digest": null,
           "files": [
             "checkpoints.sqlite",
             "digest.json",
@@ -62,7 +39,7 @@
         },
         "stderr_first_line": "FAILED ToolError: act: injected mid-run exception in act(s2)",
         "stderr_tail": "FAILED ToolError: act: injected mid-run exception in act(s2)",
-        "wall_s": 1.758
+        "wall_s": 1.026
       }
     },
     "schema_violation": {
@@ -83,36 +60,13 @@
         },
         "stderr_first_line": "FAILED ToolError: act: Output validation error: '0.40' is not of type 'number'",
         "stderr_tail": "FAILED ToolError: act: Output validation error: '0.40' is not of type 'number'",
-        "wall_s": 1.13
+        "wall_s": 0.802
       },
       "langgraph": {
         "exit_code": 3,
         "harness_had_to_kill_it": false,
         "loop_saw_exception_class": "ToolError",
         "state_after": {
-          "exit_reason_in_digest": "tool error: act: Output validation error: '0.40' is not of type 'number'",
-          "files": [
-            "checkpoints.sqlite",
-            "digest.json",
-            "record-seq.json",
-            "tool-calls.jsonl"
-          ],
-          "history_len": 7,
-          "next_nodes": [
-            "act"
-          ],
-          "status_in_digest": "failed"
-        },
-        "stderr_first_line": "FAILED ToolError: act: Output validation error: '0.40' is not of type 'number'",
-        "stderr_tail": "FAILED ToolError: act: Output validation error: '0.40' is not of type 'number'",
-        "wall_s": 1.675
-      },
-      "langgraph_no_verdict": {
-        "exit_code": 3,
-        "harness_had_to_kill_it": false,
-        "loop_saw_exception_class": "ToolError",
-        "state_after": {
-          "exit_reason_in_digest": null,
           "files": [
             "checkpoints.sqlite",
             "digest.json",
@@ -127,7 +81,7 @@
         },
         "stderr_first_line": "FAILED ToolError: act: Output validation error: '0.40' is not of type 'number'",
         "stderr_tail": "FAILED ToolError: act: Output validation error: '0.40' is not of type 'number'",
-        "wall_s": 1.694
+        "wall_s": 1.166
       }
     },
     "timeout": {
@@ -146,38 +100,15 @@
           "next_node": "act",
           "status_in_checkpoint": "failed"
         },
-        "stderr_first_line": "FAILED ToolTimeout: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
-        "stderr_tail": "FAILED ToolTimeout: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
-        "wall_s": 5.128
+        "stderr_first_line": "Process group termination failed for PID 87804: [Errno 1] Operation not permitted, falling back to simple terminate",
+        "stderr_tail": "Process group termination failed for PID 87804: [Errno 1] Operation not permitted, falling back to simple terminate\nFAILED ToolTimeout: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
+        "wall_s": 4.81
       },
       "langgraph": {
         "exit_code": 3,
         "harness_had_to_kill_it": false,
         "loop_saw_exception_class": "ToolTimeout",
         "state_after": {
-          "exit_reason_in_digest": "tool timeout: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
-          "files": [
-            "checkpoints.sqlite",
-            "digest.json",
-            "record-seq.json",
-            "tool-calls.jsonl"
-          ],
-          "history_len": 7,
-          "next_nodes": [
-            "act"
-          ],
-          "status_in_digest": "failed"
-        },
-        "stderr_first_line": "FAILED ToolTimeout: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
-        "stderr_tail": "FAILED ToolTimeout: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
-        "wall_s": 5.75
-      },
-      "langgraph_no_verdict": {
-        "exit_code": 3,
-        "harness_had_to_kill_it": false,
-        "loop_saw_exception_class": "ToolTimeout",
-        "state_after": {
-          "exit_reason_in_digest": null,
           "files": [
             "checkpoints.sqlite",
             "digest.json",
@@ -190,13 +121,13 @@
           ],
           "status_in_digest": "running"
         },
-        "stderr_first_line": "FAILED ToolTimeout: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
-        "stderr_tail": "FAILED ToolTimeout: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
-        "wall_s": 5.658
+        "stderr_first_line": "Process group termination failed for PID 87850: [Errno 1] Operation not permitted, falling back to simple terminate",
+        "stderr_tail": "Process group termination failed for PID 87850: [Errno 1] Operation not permitted, falling back to simple terminate\nFAILED ToolTimeout: act: Timed out while waiting for response to ClientRequest. Waited 2.0 seconds.",
+        "wall_s": 4.965
       }
     }
   },
-  "generated_at_utc": "2026-07-26T14:48:53Z",
+  "generated_at_utc": "2026-07-25T02:49:54Z",
   "harness_limit_s": 60,
-  "python": "3.11.15"
+  "python": "3.14.6"
 }

@@ -18,6 +18,7 @@ stopped being mechanical:
 
 from __future__ import annotations
 
+import os
 import sys
 import time
 from pathlib import Path
@@ -169,14 +170,20 @@ async def decide(state: LoopState) -> dict[str, Any]:
         return {"pending": payload, "history": hist, "status": "running"}
 
     if action == "escalate":
-        await _t().call(
-            "record",
-            {
-                "run_id": state["run_id"],
-                "kind": "escalate",
-                "detail": "; ".join(payload["tripwire"]),
-            },
-        )
+        record_args = {
+            "run_id": state["run_id"],
+            "kind": "escalate",
+            "detail": "; ".join(payload["tripwire"]),
+        }
+        # Resuming an interrupt re-executes this whole node from its first
+        # line, so anything above the interrupt() call must be idempotent.
+        # The record call is not: with it above, the escalation lands in the
+        # durable run record twice. Both orderings are measured
+        # (bench/escalation_test.py, RESULTS.md finding 5); the footgun
+        # ordering stays reproducible behind LOOPLAB_ESCALATION_ORDER.
+        record_first = os.environ.get("LOOPLAB_ESCALATION_ORDER") == "record_first"
+        if record_first:
+            await _t().call("record", record_args)
         # LangGraph's human-in-the-loop primitive. Raises GraphInterrupt, which
         # the checkpointer persists; the run can only continue via
         # Command(resume=...). This is the closest thing to LOOP.md's
@@ -188,9 +195,9 @@ async def decide(state: LoopState) -> dict[str, Any]:
                 "step_id": payload["step_id"],
             }
         )
-        # Only reached if a human resumes with Command(resume=...). NOTE: the
-        # whole node re-executes from the top on resume, including the
-        # `record` call above. Measured, see RESULTS.md finding 5.
+        # Only reached if a human resumes with Command(resume=...).
+        if not record_first:
+            await _t().call("record", record_args)
         return {
             "approved": _append(state.get("approved", []), payload["step_id"]),
             "status": "running",

@@ -4,7 +4,7 @@
     "next_nodes",
     "resumed_count"
   ],
-  "generated_at_utc": "2026-07-26T14:48:25Z",
+  "generated_at_utc": "2026-07-25T02:49:35Z",
   "known_divergence": "On the three escalating scenarios the two digests differ on `history` and `records`, and only those. Cause: LangGraph's interrupt() raises out of the decide node, so that node's state update is discarded and never committed. The escalation is recoverable only from the interrupt payload on the pending task, which langgraph_impl/run.py reads back explicitly. The hand-rolled loop commits the same update before it stops, so its own state says it escalated. Both loops halted at the same place, before the same step, having spent the same amount. See RESULTS.md finding 4.",
   "outcome_keys": [
     "status",
@@ -17,7 +17,7 @@
     "attempts",
     "verified"
   ],
-  "python": "3.11.15",
+  "python": "3.14.6",
   "scenarios": {
     "baseline": {
       "differing_keys": [],
