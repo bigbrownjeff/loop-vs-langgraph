@@ -42,6 +42,8 @@ so this is cosmetic, not blocking.
 
 ## The headline finding
 
+> **Superseded 2026-07-26:** the scoreboard below is the pre-hardening measurement; the accepted decision is to adopt LangGraph — see [DECISION.md](DECISION.md).
+
 **It is close to a wash, and the ways it is not are not the ways you would guess.** LangGraph
 came out 23 lines longer (25 with docstrings stripped), +27 distributions, +28.2 MB,
 +0.267s per run. On crash-safe checkpoint and resume, the thing people adopt it for, the two
